@@ -1,0 +1,6 @@
+@Calendify_HostAddress = http://localhost:5247
+
+GET {{Calendify_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
