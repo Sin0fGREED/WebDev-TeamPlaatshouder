@@ -31,7 +31,7 @@ Calendify is a young tech startup focused on creating solutions that encourage e
 
 2. **Install frontend dependencies:**
 	```bash
-	cd WebDev-TeamPlaatshouder
+	cd Frontend
 	npm install
 	```
 
