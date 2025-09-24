@@ -2,6 +2,7 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import { useNavigate } from "react-router-dom";
 import { useState } from 'react';
 import { useEvents, useCreateEvent } from '../events/api';
 
@@ -12,7 +13,7 @@ export default function CalendarView() {
     to: new Date(Date.now() + 7 * 864e5).toISOString(),
   });
   const { data: events } = useEvents(range.from, range.to);
-  const create = useCreateEvent();
+  const navigate = useNavigate()
 
 
   return (
@@ -25,10 +26,9 @@ export default function CalendarView() {
         events={events?.map((e) => ({ id: e.id, title: e.title, start: e.startUtc, end: e.endUtc, roomId: e.roomId }))}
         selectable
         select={(sel) => {
-          const title = prompt('Event title?');
-          if (title) {
-            create.mutate({ title, startUtc: sel.startStr, endUtc: sel.endStr });
-          }
+          navigate(
+            `/events/new?start=${encodeURIComponent(sel.startStr)}&end=${encodeURIComponent(sel.endStr)}`
+          );
         }}
         datesSet={(arg) => setRange({ from: arg.startStr, to: arg.endStr })}
         height="auto"
