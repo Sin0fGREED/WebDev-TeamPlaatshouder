@@ -5,8 +5,10 @@ using System.Text;
 
 using OfficeCalendar.Api.Hubs;
 using OfficeCalendar.Api.Endpoints;
+using OfficeCalendar.Api.Setup;
 using OfficeCalendar.Domain.Entities;
 using OfficeCalendar.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Identity;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,6 +41,8 @@ builder.Services
         };
     });
 
+builder.Services.AddScoped<IPasswordHasher<AppUser>, PasswordHasher<AppUser>>();
+
 builder.Services.AddAuthorization();
 
 // Add cors
@@ -48,28 +52,11 @@ builder.Services.AddCors(o => o.AddPolicy("web",
 
 var app = builder.Build();
 
-// Auto-apply migrations in dev/container
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
-
-    // Seed a demo employee if none exist (needed for OrganizerId FK)
-    if (!db.Employees.Any())
-    {
-        db.Employees.Add(new Employee
-        {
-            FirstName = "Demo",
-            LastName = "User",
-            Email = "demo@company.com",
-            Role = "Employee",
-            IsActive = true
-        });
-        db.SaveChanges();
-    }
-}
+// Run migrations and seed users/employees
+await DbSeeder.SeedAsync(app.Services);
 
 app.UseCors("web");
+
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -80,6 +67,9 @@ app.MapHub<CalendarHub>("/hubs/calendar");
 app.MapGroup("/api/events")
     //.RequireAuthorization()
     .MapEventsApi();
+
+app.MapGroup("/api/auth")
+  .MapAuthApi();
 
 if (app.Environment.IsDevelopment())
 // Configure the HTTP request pipeline.

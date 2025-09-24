@@ -5,6 +5,7 @@ namespace OfficeCalendar.Infrastructure.Persistence;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
+    public DbSet<AppUser> Users => Set<AppUser>();
     public DbSet<Employee> Employees => Set<Employee>();
     public DbSet<Room> Rooms => Set<Room>();
     public DbSet<CalendarEvent> Events => Set<CalendarEvent>();
@@ -49,5 +50,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         b.Entity<OfficeDay>()
             .Property(od => od.Status)
             .HasMaxLength(20);
+
+        // Unique constraint on Email
+        b.Entity<AppUser>()
+            .HasIndex(u => u.Email)
+            .IsUnique();
+
     }
 }

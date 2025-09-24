@@ -29,28 +29,28 @@ public static class EventsApi
 
         // POST /api/events
         g.MapPost("", async (AppDbContext db, IHubContext<CalendarHub> hub, CreateEventDto req) =>
-                {
-                    // pick any existing employee as organizer (demo)
-                    var organizerId = await db.Employees
-                        .Select(x => x.Id)
-                        .FirstAsync();
+        {
+            // pick any existing employee as organizer (demo)
+            var organizerId = await db.Employees
+                .Select(x => x.Id)
+                .FirstAsync();
 
-                    var e = new CalendarEvent
-                    {
-                        Title = req.Title,
-                        StartUtc = req.StartUtc,
-                        EndUtc = req.EndUtc,
-                        RoomId = req.RoomId,
-                        OrganizerId = organizerId
-                    };
+            var e = new CalendarEvent
+            {
+                Title = req.Title,
+                StartUtc = req.StartUtc,
+                EndUtc = req.EndUtc,
+                RoomId = req.RoomId,
+                OrganizerId = organizerId
+            };
 
-                    db.Events.Add(e);
-                    await db.SaveChangesAsync();
+            db.Events.Add(e);
+            await db.SaveChangesAsync();
 
-                    var dto = new EventDto(e.Id, e.Title, e.StartUtc, e.EndUtc, e.RoomId);
-                    await hub.Clients.All.SendAsync("event:created", dto);
-                    return Results.Created($"/api/events/{e.Id}", dto);
-                });
+            var dto = new EventDto(e.Id, e.Title, e.StartUtc, e.EndUtc, e.RoomId);
+            await hub.Clients.All.SendAsync("event:created", dto);
+            return Results.Created($"/api/events/{e.Id}", dto);
+        });
 
         return g;
     }
