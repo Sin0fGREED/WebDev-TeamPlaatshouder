@@ -1,31 +1,25 @@
-# Node.js / React
+# ---- Node / Vite ----
 node_modules/
-build/
 dist/
+.vite/
+*.log
 .env
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
-# .NET
+# ---- .NET / ASP.NET Core ----
 bin/
 obj/
 *.user
 *.suo
-*.userosscache
-*.sln.docstates
-*.vs/
-.vscode/
-*.dbmdl
-*.pdb
-*.cache
-*.log
-*.ide
-*.swp
 
-# OS
+# ---- Docker ----
+*.pid
+*.seed
+*.db
+docker-compose.override.yml
+
+# ---- General OS / Editor ----
 .DS_Store
 Thumbs.db
-
-# Others
-*.local
+.idea/
+.vscode/
+*.swp
