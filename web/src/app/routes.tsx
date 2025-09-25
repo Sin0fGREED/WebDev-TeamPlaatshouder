@@ -15,7 +15,7 @@ export const router = createBrowserRouter([
 
       { path: "/", element: <DashboardPage /> },
       { path: "/dashboard", element: <DashboardPage /> },
-      { path: "/calendar", element: CalendarPage() },
+      { path: "/calendar", element: <CalendarPage /> },
       { path: "/presence", element: <PresencePage /> },
       { path: "/events/new", element: <CreateEventPage /> },
       { path: "/account", element: <div className="card p-6">Account Settings</div> }
