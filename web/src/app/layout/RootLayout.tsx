@@ -78,7 +78,7 @@ export default function RootLayout() {
                 <NavLink to="/presence" className={({ isActive }) =>
                   `text-sm ${isActive ? "text-blue-600 dark:text-blue-300" : "text-gray-600 dark:text-gray-300"}`
                 }>
-                  User Presence
+                  Team Presence
                 </NavLink>
               </div>
               <div className="flex items-center gap-3">
