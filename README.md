@@ -64,11 +64,31 @@ git clone https://github.com/Sin0fGREED/WebDev-TeamPlaatshouder.git
 cd WebDev-TeamPlaatshouder
 ```
 
+Install/run Web for development (hotreload):
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+Build and watch dotnet for development (hotreload):
+```bash
+cd server
+dotnet build
+
+cd server/OfficeCalendar.Api
+dotnet watch
+```
+
 ### Run with Docker (recommended)
 
 ```bash
 # build and start all containers (detached)
 docker compose -f docker-compose.dev.yml up -d --build
+
+# build db container (for dev)
+docker compose -f docker-compose.dev.yml up -d db
 
 # view logs
 docker compose -f docker-compose.dev.yml logs -f
