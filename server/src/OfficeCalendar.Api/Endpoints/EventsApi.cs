@@ -52,6 +52,18 @@ public static class EventsApi
             return Results.Created($"/api/events/{e.Id}", dto);
         });
 
+        g.MapDelete("/delete",
+             //[Authorize(Roles = "Admin")]
+             async (AppDbContext db) =>
+        {
+            // Delete children first if no cascade
+            await db.Events.ExecuteDeleteAsync();
+
+            //await db.Database.ExecuteSqlRawAsync("DBCC CHECKIDENT ('dbo.Events', RESEED, 0);");
+
+            return Results.NoContent();
+        });
+
         return g;
     }
 }
