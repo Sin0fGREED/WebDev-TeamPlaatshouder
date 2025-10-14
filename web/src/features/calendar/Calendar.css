@@ -1,0 +1,22 @@
+/* calendar.css */
+/* Base slot height variable; changed by zoom buttons */
+:root { --fc-slot-h: 28px; }
+
+/* Make the vertical grid taller per slot */
+.fc .fc-timegrid-slot,
+.fc .fc-timegrid-slot-lane,
+.fc .fc-timegrid-axis { height: var(--fc-slot-h); }
+
+/* Ensure the event box isn't squashed for short events */
+.fc .fc-timegrid-event { min-height: calc(var(--fc-slot-h) + 8px); }
+
+/* Optional: a touch more padding inside events */
+.fc .fc-timegrid-event .fc-event-main { padding: 2px 4px; }
+
+/* Optional: prevent content clipping a bit */
+.fc .fc-event-main-frame { overflow: visible; }
+
+/* Remove FullCalendar’s default background/border so our content owns the color */
+.fc .oc-event { background: transparent !important; border: 0 !important; box-shadow: none !important; }
+.fc .oc-event .fc-event-main { padding: 0 !important; }
+
