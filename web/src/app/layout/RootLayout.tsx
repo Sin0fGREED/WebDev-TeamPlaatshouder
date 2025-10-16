@@ -1,13 +1,22 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { LayoutDashboard, CalendarDays, UserCircle2, Plus, Cog, LogOut, Layout } from "lucide-react";
+import {
+  LayoutDashboard,
+  CalendarDays,
+  UserCircle2,
+  Plus,
+  Cog,
+  LogOut,
+  Layout,
+} from "lucide-react";
 import ThemeToggle from "../../components/ThemeToggle";
 import { useAuth } from "../providers/AuthProvider";
 
-const navLink =
-  ({ isActive }: { isActive: boolean }) =>
-    `flex items-center gap-3 rounded-xl px-3 py-2 transition ${isActive ? "bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300" :
-      "hover:bg-gray-100 dark:hover:bg-white/5 text-gray-700 dark:text-gray-200"
-    }`;
+const navLink = ({ isActive }: { isActive: boolean }) =>
+  `flex items-center gap-3 rounded-xl px-3 py-2 transition ${
+    isActive
+      ? "bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300"
+      : "hover:bg-gray-100 dark:hover:bg-white/5 text-gray-700 dark:text-gray-200"
+  }`;
 
 export default function RootLayout() {
   const { logout } = useAuth();
@@ -40,7 +49,9 @@ export default function RootLayout() {
               Create Event
             </NavLink>
 
-            <div className="mt-4 px-2 text-xs uppercase text-gray-400">Settings</div>
+            <div className="mt-4 px-2 text-xs uppercase text-gray-400">
+              Settings
+            </div>
             <NavLink to="/account" className={navLink}>
               <Cog className="h-5 w-5" />
               Account Settings
@@ -65,20 +76,53 @@ export default function RootLayout() {
           <div className="sticky top-0 z-10 border-b border-border/60 bg-[rgb(var(--bg))]/70 backdrop-blur supports-[backdrop-filter]:bg-[rgb(var(--bg))]/60">
             <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
               <div className="flex items-center gap-6">
-                <NavLink to="/dashboard" className={({ isActive }) =>
-                  `text-sm ${isActive ? "text-blue-600 dark:text-blue-300" : "text-gray-600 dark:text-gray-300"}`
-                }>
+                <NavLink
+                  to="/dashboard"
+                  className={({ isActive }) =>
+                    `relative group inline-block text-sm px-2 py-1 ${
+                      isActive
+                        ? "text-blue-600 dark:text-blue-300"
+                        : "text-gray-600 dark:text-gray-300"
+                    }`
+                  }
+                >
                   Dashboard
+                  <span
+                    aria-hidden="true"
+                    className="absolute left-0 right-0 bottom-0 h-0.5 bg-[#8b1e3f] origin-center scale-x-0 transition-transform duration-300 group-hover:scale-x-100"
+                  />
                 </NavLink>
-                <NavLink to="/calendar" className={({ isActive }) =>
-                  `text-sm ${isActive ? "text-blue-600 dark:text-blue-300" : "text-gray-600 dark:text-gray-300"}`
-                }>
+                <NavLink
+                  to="/calendar"
+                  className={({ isActive }) =>
+                    `relative group inline-block text-sm px-2 py-1 ${
+                      isActive
+                        ? "text-blue-600 dark:text-blue-300"
+                        : "text-gray-600 dark:text-gray-300"
+                    }`
+                  }
+                >
                   Calendar
+                  <span
+                    aria-hidden="true"
+                    className="absolute left-0 right-0 bottom-0 h-0.5 bg-[#8b1e3f] origin-center scale-x-0 transition-transform duration-300 group-hover:scale-x-100"
+                  />
                 </NavLink>
-                <NavLink to="/presence" className={({ isActive }) =>
-                  `text-sm ${isActive ? "text-blue-600 dark:text-blue-300" : "text-gray-600 dark:text-gray-300"}`
-                }>
-                  Team Presence
+                <NavLink
+                  to="/presence"
+                  className={({ isActive }) =>
+                    `relative group inline-block text-sm px-2 py-1 ${
+                      isActive
+                        ? "text-blue-600 dark:text-blue-300"
+                        : "text-gray-600 dark:text-gray-300"
+                    }`
+                  }
+                >
+                  Team presence
+                  <span
+                    aria-hidden="true"
+                    className="absolute left-0 right-0 bottom-0 h-0.5 bg-[#8b1e3f] origin-center scale-x-0 transition-transform duration-300 group-hover:scale-x-100"
+                  />
                 </NavLink>
               </div>
               <div className="flex items-center gap-3">
