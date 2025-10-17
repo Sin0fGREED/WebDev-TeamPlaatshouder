@@ -5,6 +5,7 @@ using OfficeCalendar.Api.Hubs;
 using OfficeCalendar.Infrastructure.Persistence;
 using OfficeCalendar.Domain.Entities;
 using OfficeCalendar.Application.DTOs;
+using System.Security.Claims;
 
 namespace OfficeCalendar.Api.Endpoints;
 
@@ -27,11 +28,24 @@ public static class EventsApi
             return Results.Ok(items);
         });
 
-        // POST /api/events
-        g.MapPost("", async (AppDbContext db, IHubContext<CalendarHub> hub, CreateEventDto req) =>
+        // GET /api/events/{event_id}
+        g.MapGet("/{event_id}", async (Guid event_id, AppDbContext db) =>
         {
-            // pick any existing employee as organizer (demo)
+            var item = await db.Events
+                .Where(e => e.Id == event_id)
+                .Select(e => new EventDto(e.Id, e.Title, e.StartUtc, e.EndUtc, e.RoomId)).FirstAsync();
+
+            return Results.Ok(item);
+
+        });
+
+        // POST /api/events
+        g.MapPost("", async (AppDbContext db, IHubContext<CalendarHub> hub, CreateEventDto req, ClaimsPrincipal user) =>
+        {
+            var userId = Guid.Parse(user.FindFirst("sub")!.Value);
+
             var organizerId = await db.Employees
+                .Where(e => e.Id == userId)
                 .Select(x => x.Id)
                 .FirstAsync();
 
@@ -52,6 +66,36 @@ public static class EventsApi
             return Results.Created($"/api/events/{e.Id}", dto);
         });
 
+
+        // PUT /api/events/{event_id}
+        g.MapPut("/{event_id}", async (Guid eventId, AppDbContext db, IHubContext<CalendarHub> hub, CreateEventDto req, ClaimsPrincipal user) =>
+        {
+            var userId = Guid.Parse(user.FindFirst("sub")!.Value);
+            if (userId != eventId)
+                return Results.Forbid();
+
+            var e = await db.Events.FindAsync(eventId);
+            if (e is null)
+                return Results.NotFound();
+
+            e.Title = req.Title;
+            e.Description = req.Description;
+            e.Attendees = req.Attendees;
+            e.StartUtc = req.StartUtc;
+            e.EndUtc = req.StartUtc;
+
+            db.Events.Entry(e).State = EntityState.Modified;
+
+            await db.SaveChangesAsync();
+
+            var dto = new EventDto(e.Id, e.Title, e.StartUtc, e.EndUtc, e.RoomId);
+            await hub.Clients.All.SendAsync("event:created", dto);
+            return Results.Created($"/api/events/{e.Id}", dto);
+
+        });
+
+        // TODO : Make this locked for admins only or completely remove this function :)
+        // DELETE /api/events
         g.MapDelete("/delete",
              //[Authorize(Roles = "Admin")]
              async (AppDbContext db) =>
@@ -63,6 +107,24 @@ public static class EventsApi
 
             return Results.NoContent();
         });
+
+        // TODO: Constrain this action to admins or users that own the event
+        g.MapDelete("/delete/{event_id}", async (Guid event_id, AppDbContext db, ClaimsPrincipal user) =>
+            {
+                var userId = Guid.Parse(user.FindFirst("sub")!.Value);
+
+                var e = await db.Events.FindAsync(event_id);
+                if (e is null)
+                    return Results.NotFound();
+
+                if (e.OrganizerId != userId)
+                    return Results.Forbid();
+
+                db.Events.Remove(e);
+                await db.SaveChangesAsync();
+                return Results.NoContent();
+            });
+
 
         return g;
     }
