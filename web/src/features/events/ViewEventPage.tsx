@@ -1,13 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useEvent } from "./api";
 
 export default function ViewEventPage() {
   const { event_id } = useParams();
 
   const { data: event } = useEvent(event_id!);
-
-
 
   return (
     <div className="mx-auto max-w-3xl">
