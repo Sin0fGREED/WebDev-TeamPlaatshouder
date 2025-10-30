@@ -19,3 +19,8 @@ export const useCreateEvent = () => {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['events'] }),
   });
 };
+
+export const useEvent = (id: string) => useQuery({
+  queryKey: ['event', id],
+  queryFn: async () => (await api.get<EventDto>(`/api/events/${id}`)).data,
+});
