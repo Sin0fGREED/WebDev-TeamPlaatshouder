@@ -98,6 +98,8 @@ export default function CalendarView() {
         initialView="timeGridWeek"
         headerToolbar={{ left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' }}
         events={formattedEvents}
+        eventClick={(eca) => {
+        }}
         eventContent={(eventInfo) => <CustomEventContent eventInfo={eventInfo} />}
         eventClassNames={() => ['oc-event']}
         selectable
