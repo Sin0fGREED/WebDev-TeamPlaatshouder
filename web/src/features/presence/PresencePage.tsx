@@ -1,3 +1,8 @@
+import { useUsers } from "./api";
+
+const { data: users } = useUsers();
+
+
 const people = [
   { name: "Alice Johnson", role: "Software Engineer", status: "In Office" },
   { name: "Bob Williams", role: "Product Manager", status: "Remote" },
