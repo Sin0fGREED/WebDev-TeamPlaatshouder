@@ -99,6 +99,7 @@ export default function CalendarView() {
         headerToolbar={{ left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' }}
         events={formattedEvents}
         eventClick={(eca) => {
+          navigate(`/events/${eca.event.id}`);
         }}
         eventContent={(eventInfo) => <CustomEventContent eventInfo={eventInfo} />}
         eventClassNames={() => ['oc-event']}
