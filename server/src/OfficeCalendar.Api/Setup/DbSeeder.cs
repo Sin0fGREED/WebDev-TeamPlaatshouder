@@ -21,6 +21,7 @@ public static class DbSeeder
         const string adminPassword = "password"; // dev-only
 
         var adminExists = await db.Users.AnyAsync(u => u.Email == adminEmail);
+        Guid adminId = Guid.Empty;
         if (!adminExists)
         {
             var admin = new AppUser
@@ -29,6 +30,7 @@ public static class DbSeeder
                 IsActive = true
             };
             admin.PasswordHash = hasher.HashPassword(admin, adminPassword);
+            adminId = admin.Id;
 
             db.Users.Add(admin);
             await db.SaveChangesAsync();
@@ -40,6 +42,7 @@ public static class DbSeeder
         {
             db.Employees.Add(new Employee
             {
+                Id = adminId,
                 FirstName = "Demo",
                 LastName = "User",
                 Email = "demo@company.com",

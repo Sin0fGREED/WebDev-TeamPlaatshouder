@@ -42,12 +42,25 @@ public static class EventsApi
         // POST /api/events
         g.MapPost("", async (AppDbContext db, IHubContext<CalendarHub> hub, CreateEventDto req, ClaimsPrincipal user) =>
         {
-            var userId = Guid.Parse(user.FindFirst("sub")!.Value);
+            var userId = user.Identity!.Name!;
+            if (userId is null)
+            {
+                return Results.Unauthorized();
+            }
+
+            var id = Guid.Parse(userId);
 
             var organizerId = await db.Employees
-                .Where(e => e.Id == userId)
+                .Where(e => e.Id == id)
                 .Select(x => x.Id)
-                .FirstAsync();
+                .FirstOrDefaultAsync();
+
+            Console.WriteLine($"{userId}: {id} : {organizerId}");
+
+            if (organizerId == Guid.Empty)
+            {
+                return Results.NotFound();
+            }
 
             var e = new CalendarEvent
             {

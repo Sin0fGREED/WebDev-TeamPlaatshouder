@@ -1,7 +1,7 @@
 namespace OfficeCalendar.Domain.Entities;
 public sealed class Employee
 {
-    public Guid Id { get; init; } = Guid.NewGuid();
+    public Guid Id { get; set; } = default!;
     public string FirstName { get; set; } = default!;
     public string LastName { get; set; } = default!;
     public string Email { get; set; } = default!;
