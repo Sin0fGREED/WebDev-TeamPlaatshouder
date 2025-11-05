@@ -5,6 +5,14 @@ export default function AccountSettings() {
   const [highContrast, setHighContrast] = useState<boolean>(() => localStorage.getItem('access-high-contrast') === 'true');
   const [reducedMotion, setReducedMotion] = useState<boolean>(() => localStorage.getItem('access-reduced-motion') === 'true');
   const [magnifier, setMagnifier] = useState<boolean>(() => localStorage.getItem('access-magnifier') === 'true');
+  const [magnifierZoom, setMagnifierZoom] = useState<number>(() => {
+    const v = localStorage.getItem('access-magnifier-zoom');
+    return v ? Number(v) : 1.75;
+  });
+  const [magnifierSize, setMagnifierSize] = useState<number>(() => {
+    const v = localStorage.getItem('access-magnifier-size');
+    return v ? Number(v) : 220;
+  });
 
   useEffect(() => {
     document.documentElement.classList.toggle('access-large-text', largeText);
@@ -25,6 +33,17 @@ export default function AccountSettings() {
     document.documentElement.classList.toggle('access-magnifier', magnifier);
     localStorage.setItem('access-magnifier', String(magnifier));
   }, [magnifier]);
+
+  useEffect(() => {
+    // Persist zoom and expose via data- attributes for the magnifier component
+    localStorage.setItem('access-magnifier-zoom', String(magnifierZoom));
+    document.documentElement.dataset.magnifierZoom = String(magnifierZoom);
+  }, [magnifierZoom]);
+
+  useEffect(() => {
+    localStorage.setItem('access-magnifier-size', String(magnifierSize));
+    document.documentElement.dataset.magnifierSize = String(magnifierSize);
+  }, [magnifierSize]);
 
   return (
     <div className="card p-6">
@@ -67,6 +86,21 @@ export default function AccountSettings() {
             <div className="text-sm text-gray-500">Increase interface scale and show a visible magnifier indicator for easier reading.</div>
           </div>
         </label>
+
+        {/* Magnifier controls: zoom and lens size */}
+        <div className="space-y-2 px-2">
+          <div className="flex items-center justify-between">
+            <div className="text-sm font-medium">Zoom level</div>
+            <div className="text-xs text-gray-500">{magnifierZoom.toFixed(2)}x</div>
+          </div>
+          <input aria-label="Magnifier zoom" type="range" min="1.1" max="3" step="0.05" value={magnifierZoom} onChange={(e) => setMagnifierZoom(Number(e.target.value))} />
+
+          <div className="flex items-center justify-between">
+            <div className="text-sm font-medium">Lens size</div>
+            <div className="text-xs text-gray-500">{magnifierSize}px</div>
+          </div>
+          <input aria-label="Magnifier size" type="range" min="100" max="480" step="10" value={magnifierSize} onChange={(e) => setMagnifierSize(Number(e.target.value))} />
+        </div>
       </div>
     </div>
   );

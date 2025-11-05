@@ -142,6 +142,25 @@ html, body {
 /* Slightly stronger large text rule when magnifier is enabled */
 .access-magnifier .access-large-text { font-size: 20px; }
 
+/* Magnifier lens styles */
+.magnifier-lens {
+  position: fixed;
+  pointer-events: none;
+  border-radius: 50%;
+  overflow: hidden;
+  z-index: 9998;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.14);
+  border: 2px solid rgba(3,253,252,0.22);
+}
+.magnifier-inner {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+}
+.magnifier-lens img { display: none; }
+
 /* Nav active/inactive helpers */
 .nav-active { background: var(--accent-08); color: var(--accent); }
 .dark .nav-active { background: color-mix(in srgb, var(--accent) 12%, black 88%); color: var(--accent); }

@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { LayoutDashboard, CalendarDays, UserCircle2, Plus, Cog, LogOut, Menu } from "lucide-react";
 import ThemeToggle from "../../components/ThemeToggle";
+import Magnifier from "../../components/Magnifier";
 import { useAuth } from "../providers/AuthProvider";
 import { useEffect, useState } from "react";
 
@@ -16,6 +17,8 @@ export default function RootLayout() {
 
   return (
     <div className="min-h-screen">
+      {/* Mount global magnifier (listens for access-magnifier class) */}
+      <Magnifier />
       <div className="flex">
         {/* Sidebar */}
   <aside className={`hidden md:flex ${collapsed ? 'w-20' : 'w-64'} h-screen flex-col gap-6 border-r border-border/60 bg-[rgb(var(--panel))] p-4 overflow-y-auto transition-width duration-200` }>
