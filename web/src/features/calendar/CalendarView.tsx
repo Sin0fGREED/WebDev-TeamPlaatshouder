@@ -62,7 +62,7 @@ export default function CalendarView() {
   })), [events]);
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="p-6 w-full">
       <div className="mb-3 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Team Calendar</h1>
         <div className="flex items-center gap-2">
@@ -134,10 +134,10 @@ const CustomEventContent = ({ eventInfo }: { eventInfo: EventContentArg }) => {
 
 
   return (
-    <div className="h-full w-full overflow-hidden rounded-md text-white p-1.5 bg-indigo-600">
-      < p className="font-bold truncate" > {title}</p >
+    <div className="h-full w-full overflow-hidden p-1.5 oc-event-inner">
+      <p className="font-bold truncate">{title}</p>
 
-      <div className="mt-1 flex items-center space-x-1 opacity-90">
+      <div className="mt-1 flex items-center space-x-1 meta">
         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
         <span>
           {fmt(eventInfo.event.start!)}
@@ -145,29 +145,27 @@ const CustomEventContent = ({ eventInfo }: { eventInfo: EventContentArg }) => {
         </span>
       </div>
 
-      {
-        roomId && (
-          <div className="mt-1 flex items-center space-x-1 opacity-90">
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-            <span className="truncate">{roomId}</span>
-          </div>
-        )
-      }
+      {roomId && (
+        <div className="mt-1 flex items-center space-x-1 meta">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          <span className="truncate">{roomId}</span>
+        </div>
+      )}
 
-      {
-        !!attendees.length && (
-          <div className="mt-2 flex items-center -space-x-2">
-            {attendees.slice(0, 3).map((att) => (
-              <p key={att.id}>{att.name}</p>
-            ))}
-            {attendees.length > 3 && (
-              <div className="w-5 h-5 rounded-full bg-indigo-700 flex items-center justify-center text-white text-[10px]">
-                +{attendees.length - 3}
-              </div>
-            )}
-          </div>
-        )
-      }
-    </div >
+      {!!attendees.length && (
+        <div className="mt-2 flex items-center -space-x-2">
+          {attendees.slice(0, 3).map((att) => (
+            <div key={att.id} className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[11px] text-white">
+              {att.name[0]}
+            </div>
+          ))}
+          {attendees.length > 3 && (
+            <div className="w-6 h-6 rounded-full bg-[color:var(--accent)] flex items-center justify-center text-white text-[10px]">
+              +{attendees.length - 3}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 };

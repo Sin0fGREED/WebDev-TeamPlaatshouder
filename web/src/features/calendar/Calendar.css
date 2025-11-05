@@ -2,6 +2,23 @@
 /* Base slot height variable; changed by zoom buttons */
 :root { --fc-slot-h: 28px; }
 
+/* Project palette (from provided image) */
+:root {
+	--oc-bg-dark: #222831;    /* very dark charcoal */
+	--oc-dark-gray: #3f4448;  /* muted dark gray */
+	--oc-teal: #00bfbf;       /* teal band */
+	--oc-light: #f0f0f0;      /* light neutral */
+	--oc-foreground: #ffffff; /* text on dark/teal */
+}
+
+/* Use the design tokens defined in App.css when available */
+:root {
+  --radius-sm: var(--radius-sm, 6px);
+  --radius-md: var(--radius-md, 10px);
+  --shadow-sm: var(--shadow-sm, 0 6px 18px rgba(13, 52, 224, 0.932));
+  --muted: var(--muted, #6b7280);
+}
+
 /* Make the vertical grid taller per slot */
 .fc .fc-timegrid-slot,
 .fc .fc-timegrid-slot-lane,
@@ -14,9 +31,75 @@
 .fc .fc-timegrid-event .fc-event-main { padding: 2px 4px; }
 
 /* Optional: prevent content clipping a bit */
+
 .fc .fc-event-main-frame { overflow: visible; }
 
-/* Remove FullCalendar’s default background/border so our content owns the color */
-.fc .oc-event { background: transparent !important; border: 0 !important; box-shadow: none !important; }
-.fc .oc-event .fc-event-main { padding: 0 !important; }
+/* --- Apply the palette to calendar UI (minimal, non-invasive) --- */
+/* Make the time axis darker to match the top bands */
+.fc { background: var(--card); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); overflow: hidden; }
+.fc .fc-timegrid-axis { background: var(--palette-mid); color: var(--muted); }
+
+/* Slight background for the day columns to separate content */
+.fc .fc-timegrid-col { background: linear-gradient(180deg, transparent, rgba(0,0,0,0.01)); }
+
+/* Header / toolbar: dark bar using the darkest color */
+.fc .fc-toolbar, .fc .fc-toolbar-chunk { background: var(--palette-dark); color: var(--palette-light); }
+.fc .fc-toolbar .fc-button, .fc .fc-toolbar button { color: var(--palette-light); border-color: rgba(255,255,255,0.06); }
+.fc .fc-toolbar .fc-toolbar-title { font-weight: 600; color: var(--palette-light); }
+
+/* Style our events (we add `oc-event` via eventClassNames).
+	 Strategy: make the outer container neutral and let only
+	 `.fc-event-main` show the accent. Remove any background/shadow
+	 from nested frames to avoid stacked/ghosted visuals. */
+.fc .oc-event {
+	/* keep the wrapper neutral so FullCalendar's internal frames don't stack */
+	background: transparent !important;
+	border: 0 !important;
+	padding: 0 !important;
+}
+
+.fc .oc-event .fc-event-main {
+	display: block !important;
+	background: var(--accent) !important;
+	color: #000000 !important; /* dark text on bright teal for contrast */
+	border-radius: var(--radius-sm) !important;
+	box-shadow: 0 2px 6px rgba(0,0,0,0.08) !important;
+	padding: 6px 8px !important;
+	font-size: 12px !important;
+	line-height: 1.1 !important;
+	overflow: hidden !important;
+	z-index: 3 !important;
+	border: 1px solid rgb(0, 0, 0) !important;
+    background-color: rgba(3, 253, 252) !important;
+}
+
+html:not(.dark) .fc .fc-button,
+html:not(.dark) .fc .fc-button,
+html:not(.dark) .fc .fc-button:hover {
+	color: var(--muted);
+	background: rgb(255, 29, 29);
+	border: 1px solid rgb(0, 0, 0);
+}
+
+/* Ensure the small view buttons (month/week/day) are visible */
+html:not(.dark) .fc .fc-button-primary {
+	background: var(--accent-08);
+	color: var(--accent);
+}
+html:not(.dark) .fc .fc-button-primary.fc-button-active {
+	background: var(--accent) !important;
+	color: #001717 !important;
+}
+
+/* Add a soft light-blue hover for toolbar buttons (light mode) */
+html:not(.dark) .fc .fc-button:hover {
+	background: rgb(3, 253, 252) !important; /* light blue hover */
+	color: var(--accent) !important;
+}
+
+
+.fc .oc-event .fc-event-main:hover { transform: translateY(-2px); transition: transform 140ms ease; }
+
+
+.fc .oc-event .fc-event-main .meta { opacity: 0.9; font-size: 11px; }
 
