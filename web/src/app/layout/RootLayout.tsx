@@ -21,7 +21,7 @@ export default function RootLayout() {
       <Magnifier />
       <div className="flex">
         {/* Sidebar */}
-  <aside className={`hidden md:flex ${collapsed ? 'w-20' : 'w-64'} h-screen flex-col gap-6 border-r border-border/60 bg-[rgb(var(--panel))] p-4 overflow-y-auto transition-width duration-200` }>
+  <aside className={`hidden md:flex sticky top-0 self-start ${collapsed ? 'w-20' : 'w-64'} h-screen flex-col gap-6 border-r border-border/60 bg-[rgb(var(--panel))] p-4 overflow-y-auto transition-width duration-200` }>
           <div className="flex items-center gap-2 px-2 pt-2">
             <div className="h-8 w-8 rounded-lg brand" />
             {!collapsed && <div className="font-semibold">Office Calendar</div>}
