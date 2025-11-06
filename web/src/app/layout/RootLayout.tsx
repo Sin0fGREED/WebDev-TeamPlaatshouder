@@ -22,7 +22,7 @@ export default function RootLayout() {
       <div className="flex">
         {/* Sidebar */}
   <aside className={`hidden md:flex sticky top-0 self-start ${collapsed ? 'w-20' : 'w-64'} h-screen flex-col gap-6 border-r border-border/60 bg-[rgb(var(--panel))] p-4 overflow-y-auto transition-width duration-200` }>
-          <div className="flex items-center gap-2 px-2 pt-2">
+          <div className="flex items-center gap-0 px-3 pt-3">
             <div className="h-8 w-8 rounded-lg brand" />
             {!collapsed && <div className="font-semibold">Office Calendar</div>}
             <button aria-label="Toggle sidebar" onClick={() => setCollapsed(c => !c)} className="ml-auto rounded p-1 hover:bg-white/5">
