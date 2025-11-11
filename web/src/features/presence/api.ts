@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '../../lib/api';
 
 
-export type UserDto = { id: string; name: string };
+export type UserDto = { id: string; email: string; role: string; status: string; };
 
 
 export const useUsers = () =>
