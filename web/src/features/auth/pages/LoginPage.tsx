@@ -16,7 +16,7 @@ export default function LoginPage() {
     setError(null);
     try {
       // somewhere in your LoginPage submit:
-      const email = "admin@test.com";
+      const email = "bob@gmail.com";
       const password = "password";
       const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/auth/login`, {
         method: "POST",
