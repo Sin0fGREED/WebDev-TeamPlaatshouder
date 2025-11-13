@@ -18,14 +18,18 @@ export default function LoginPage() {
       // somewhere in your LoginPage submit:
       const email = "admin@test.com";
       const password = "password";
-      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_API_BASE}/api/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        }
+      );
+      console.log(res);
       if (!res.ok) throw new Error("Invalid credentials");
       const { token } = await res.json();
-      login(token, { email })
+      login(token, { email });
       navigate(from, { replace: true });
     } catch (err: any) {
       setError(err.message ?? "Login failed");
