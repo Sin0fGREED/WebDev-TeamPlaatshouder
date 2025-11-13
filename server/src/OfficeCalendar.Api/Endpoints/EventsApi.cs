@@ -26,7 +26,7 @@ public static class EventsApi
                 .ToListAsync(ct);
 
             return Results.Ok(items);
-        });
+        }).RequireAuthorization();
 
         // GET /api/events/{event_id}
         g.MapGet("/{event_id}", async (Guid event_id, AppDbContext db) =>
@@ -37,25 +37,29 @@ public static class EventsApi
 
             return Results.Ok(item);
 
-        });
+        }).RequireAuthorization();
 
         // POST /api/events
         g.MapPost("", async (AppDbContext db, IHubContext<CalendarHub> hub, CreateEventDto req, ClaimsPrincipal user) =>
         {
-            var userId = user.Identity!.Name!;
-            if (userId is null)
+            var userIdString = user.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userIdString))
             {
+                Console.WriteLine("userId is null!");
                 return Results.Unauthorized();
             }
 
-            var id = Guid.Parse(userId);
-
+            if (!Guid.TryParse(userIdString, out var userId))
+            {
+                Console.WriteLine($"Could not parse user id: {userIdString}");
+                return Results.Unauthorized();
+            }
             var organizerId = await db.Employees
-                .Where(e => e.Id == id)
-                .Select(x => x.Id)
-                .FirstOrDefaultAsync();
+           .Where(e => e.UserId == userId)
+           .Select(e => e.Id)
+           .FirstOrDefaultAsync();
 
-            Console.WriteLine($"{userId}: {id} : {organizerId}");
+            Console.WriteLine($"{userIdString}: {userId} : {organizerId}");
 
             if (organizerId == Guid.Empty)
             {
@@ -77,13 +81,24 @@ public static class EventsApi
             var dto = new EventDto(e.Id, e.Title, e.StartUtc, e.EndUtc, e.RoomId);
             await hub.Clients.All.SendAsync("event:created", dto);
             return Results.Created($"/api/events/{e.Id}", dto);
-        });
+        }).RequireAuthorization();
 
 
         // PUT /api/events/{event_id}
         g.MapPut("/{event_id}", async (Guid eventId, AppDbContext db, IHubContext<CalendarHub> hub, CreateEventDto req, ClaimsPrincipal user) =>
         {
-            var userId = Guid.Parse(user.FindFirst("sub")!.Value);
+            var userIdString = user.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userIdString))
+            {
+                Console.WriteLine("userId is null!");
+                return Results.Unauthorized();
+            }
+
+            if (!Guid.TryParse(userIdString, out var userId))
+            {
+                Console.WriteLine($"Could not parse user id: {userIdString}");
+                return Results.Unauthorized();
+            }
             if (userId != eventId)
                 return Results.Forbid();
 
@@ -105,7 +120,7 @@ public static class EventsApi
             await hub.Clients.All.SendAsync("event:created", dto);
             return Results.Created($"/api/events/{e.Id}", dto);
 
-        });
+        }).RequireAuthorization();
 
         // TODO : Make this locked for admins only or completely remove this function :)
         // DELETE /api/events
@@ -119,7 +134,7 @@ public static class EventsApi
             //await db.Database.ExecuteSqlRawAsync("DBCC CHECKIDENT ('dbo.Events', RESEED, 0);");
 
             return Results.NoContent();
-        });
+        }).RequireAuthorization();
 
         // TODO: Constrain this action to admins or users that own the event
         g.MapDelete("/delete/{event_id}", async (Guid event_id, AppDbContext db, ClaimsPrincipal user) =>
@@ -136,8 +151,7 @@ public static class EventsApi
                 db.Events.Remove(e);
                 await db.SaveChangesAsync();
                 return Results.NoContent();
-            });
-
+            }).RequireAuthorization();
 
         return g;
     }

@@ -16,7 +16,7 @@ public static class UsersApi
             var users = await db.Users.ToListAsync();
 
             return Results.Ok(users);
-        });
+        }).RequireAuthorization();
 
         // GET /api/users/{user_id}
         g.MapGet("/{user_id}", async (Guid user_id, AppDbContext db) =>
@@ -27,7 +27,7 @@ public static class UsersApi
 
             return Results.Ok(user);
 
-        });
+        }).RequireAuthorization();
 
         return g;
 
