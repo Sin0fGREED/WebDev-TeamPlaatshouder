@@ -1,13 +1,17 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { LayoutDashboard, CalendarDays, UserCircle2, Plus, Cog, LogOut, Menu } from "lucide-react";
-import ThemeToggle from "../../components/ThemeToggle";
+import {ThemeToggle} from "../../components/ThemeToggle";
 import Magnifier from "../../components/Magnifier";
 import { useAuth } from "../providers/AuthProvider";
 import { useEffect, useState } from "react";
+import HamburgerMenu from "@/components/HamburgerMenu";
 
 const navLink =
   ({ isActive }: { isActive: boolean }) =>
-  `flex items-center gap-3 rounded-xl px-3 py-2 transition ${isActive ? "hover:text-white bg-blue-500 dark:bg-white-700/15": "hover:bg-blue-900/10 hover:text-blue-700 nav-inactive"}`;
+  `flex items-center gap-3 rounded-xl px-3 py-2 transition ${
+    isActive 
+    ? "bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300 transition-colors duration-500"
+    : "hover:bg-gray-100 dark:hover:bg-white/5 text-gray-700 dark:text-gray-200 transition-colors duration-500"}`;
 
 export default function RootLayout() {
   const { logout } = useAuth();
@@ -48,7 +52,9 @@ export default function RootLayout() {
               {!collapsed && 'Create Event'}
             </NavLink>
 
-            <div className="mt-4 px-2 text-xs uppercase text-gray-400">Settings</div>
+            <div className="mt-4 px-2 text-xs uppercase text-gray-400">
+              Settings
+            </div>
             <NavLink to="/account" className={navLink}>
               <Cog className="h-5 w-5" />
               {!collapsed && 'Account Settings'}
@@ -73,20 +79,53 @@ export default function RootLayout() {
           <div className="sticky top-0 z-10 border-b border-border/60 bg-[rgb(var(--bg))]/70 backdrop-blur supports-[backdrop-filter]:bg-[rgb(var(--bg))]/60">
             <div className="flex w-full items-center justify-between px-6 py-3">
               <div className="flex items-center gap-6">
-                <NavLink to="/dashboard" className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-xl px-3 py-2 transition ${isActive ? "hover:text-white bg-blue-500 dark:bg-white-700/15": "hover:bg-blue-900/10 hover:text-blue-700 nav-inactive"}`
-                }>
+                <NavLink
+                  to="/dashboard"
+                  className={({ isActive }) =>
+                    `relative group inline-block text-sm px-2 py-1 ${
+                      isActive
+                        ? "text-blue-600 dark:text-blue-300 transition-colors duration-500"
+                        : "text-gray-600 dark:text-gray-300 transition-colors duration-500"
+                    }`
+                  }
+                >
                   Dashboard
+                  <span
+                    aria-hidden="true"
+                    className="absolute left-0 right-0 bottom-0 h-0.5 bg-[#8b1e3f] origin-center scale-x-0 transition-transform duration-500 group-hover:scale-x-100"
+                  />
                 </NavLink>
-                <NavLink to="/calendar" className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-xl px-3 py-2 transition ${isActive ? "hover:text-white bg-blue-500 dark:bg-white-700/15": "hover:bg-blue-900/10 hover:text-blue-700 nav-inactive"}`
-                }>
+                <NavLink
+                  to="/calendar"
+                  className={({ isActive }) =>
+                    `relative group inline-block text-sm px-2 py-1 ${
+                      isActive
+                        ? "text-blue-600 dark:text-blue-300 transition-colors duration-500"
+                        : "text-gray-600 dark:text-gray-300 transition-colors duration-500"
+                    }`
+                  }
+                >
                   Calendar
+                  <span
+                    aria-hidden="true"
+                    className="absolute left-0 right-0 bottom-0 h-0.5 bg-[#8b1e3f] origin-center scale-x-0 transition-transform duration-500 group-hover:scale-x-100"
+                  />
                 </NavLink>
-                <NavLink to="/presence" className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-xl px-3 py-2 transition ${isActive ? "hover:text-white bg-blue-500 dark:bg-white-700/15": "hover:bg-blue-900/10 hover:text-blue-700 nav-inactive"}`
-                }>
-                  Team Presence
+                <NavLink
+                  to="/presence"
+                  className={({ isActive }) =>
+                    `relative group inline-block text-sm px-2 py-1 ${
+                      isActive
+                        ? "text-blue-600 dark:text-blue-300 transition-colors duration-500"
+                        : "text-gray-600 dark:text-gray-300 transition-colors duration-500"
+                    }`
+                  }
+                >
+                  Team presence
+                  <span
+                    aria-hidden="true"
+                    className="absolute left-0 right-0 bottom-0 h-0.5 bg-[#8b1e3f] origin-center scale-x-0 transition-transform duration-500 group-hover:scale-x-100"
+                  />
                 </NavLink>
               </div>
               <div className="flex items-center gap-3">
@@ -96,7 +135,7 @@ export default function RootLayout() {
                 >
                   <Plus className="h-4 w-4" /> New Event
                 </NavLink>
-                <ThemeToggle />
+                <HamburgerMenu />
               </div>
             </div>
           </div>
