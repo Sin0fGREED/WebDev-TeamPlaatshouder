@@ -9,6 +9,7 @@ using OfficeCalendar.Api.Setup;
 using OfficeCalendar.Domain.Entities;
 using OfficeCalendar.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,8 +38,10 @@ builder.Services
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
+            NameClaimType = ClaimTypes.NameIdentifier,
         };
+        options.MapInboundClaims = false;
     });
 
 builder.Services.AddScoped<IPasswordHasher<AppUser>, PasswordHasher<AppUser>>();
@@ -70,6 +73,9 @@ app.MapGroup("/api/events")
 
 app.MapGroup("/api/auth")
   .MapAuthApi();
+
+app.MapGroup("/api/users")
+  .MapUsersApi();
 
 if (app.Environment.IsDevelopment())
 // Configure the HTTP request pipeline.
