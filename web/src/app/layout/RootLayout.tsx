@@ -8,14 +8,14 @@ import {
   LogOut,
   Layout,
 } from "lucide-react";
-import ThemeToggle from "../../components/ThemeToggle";
 import { useAuth } from "../providers/AuthProvider";
+import HamburgerMenu from "@/components/HamburgerMenu";
 
 const navLink = ({ isActive }: { isActive: boolean }) =>
   `flex items-center gap-3 rounded-xl px-3 py-2 transition ${
     isActive
-      ? "bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300"
-      : "hover:bg-gray-100 dark:hover:bg-white/5 text-gray-700 dark:text-gray-200"
+      ? "bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300 transition-colors duration-500"
+      : "hover:bg-gray-100 dark:hover:bg-white/5 text-gray-700 dark:text-gray-200 transition-colors duration-500"
   }`;
 
 export default function RootLayout() {
@@ -81,15 +81,15 @@ export default function RootLayout() {
                   className={({ isActive }) =>
                     `relative group inline-block text-sm px-2 py-1 ${
                       isActive
-                        ? "text-blue-600 dark:text-blue-300"
-                        : "text-gray-600 dark:text-gray-300"
+                        ? "text-blue-600 dark:text-blue-300 transition-colors duration-500"
+                        : "text-gray-600 dark:text-gray-300 transition-colors duration-500"
                     }`
                   }
                 >
                   Dashboard
                   <span
                     aria-hidden="true"
-                    className="absolute left-0 right-0 bottom-0 h-0.5 bg-[#8b1e3f] origin-center scale-x-0 transition-transform duration-300 group-hover:scale-x-100"
+                    className="absolute left-0 right-0 bottom-0 h-0.5 bg-[#8b1e3f] origin-center scale-x-0 transition-transform duration-500 group-hover:scale-x-100"
                   />
                 </NavLink>
                 <NavLink
@@ -97,15 +97,15 @@ export default function RootLayout() {
                   className={({ isActive }) =>
                     `relative group inline-block text-sm px-2 py-1 ${
                       isActive
-                        ? "text-blue-600 dark:text-blue-300"
-                        : "text-gray-600 dark:text-gray-300"
+                        ? "text-blue-600 dark:text-blue-300 transition-colors duration-500"
+                        : "text-gray-600 dark:text-gray-300 transition-colors duration-500"
                     }`
                   }
                 >
                   Calendar
                   <span
                     aria-hidden="true"
-                    className="absolute left-0 right-0 bottom-0 h-0.5 bg-[#8b1e3f] origin-center scale-x-0 transition-transform duration-300 group-hover:scale-x-100"
+                    className="absolute left-0 right-0 bottom-0 h-0.5 bg-[#8b1e3f] origin-center scale-x-0 transition-transform duration-500 group-hover:scale-x-100"
                   />
                 </NavLink>
                 <NavLink
@@ -113,15 +113,15 @@ export default function RootLayout() {
                   className={({ isActive }) =>
                     `relative group inline-block text-sm px-2 py-1 ${
                       isActive
-                        ? "text-blue-600 dark:text-blue-300"
-                        : "text-gray-600 dark:text-gray-300"
+                        ? "text-blue-600 dark:text-blue-300 transition-colors duration-500"
+                        : "text-gray-600 dark:text-gray-300 transition-colors duration-500"
                     }`
                   }
                 >
                   Team presence
                   <span
                     aria-hidden="true"
-                    className="absolute left-0 right-0 bottom-0 h-0.5 bg-[#8b1e3f] origin-center scale-x-0 transition-transform duration-300 group-hover:scale-x-100"
+                    className="absolute left-0 right-0 bottom-0 h-0.5 bg-[#8b1e3f] origin-center scale-x-0 transition-transform duration-500 group-hover:scale-x-100"
                   />
                 </NavLink>
               </div>
@@ -132,7 +132,7 @@ export default function RootLayout() {
                 >
                   <Plus className="h-4 w-4" /> New Event
                 </NavLink>
-                <ThemeToggle />
+                <HamburgerMenu />
               </div>
             </div>
           </div>
