@@ -12,7 +12,7 @@ import { useAuth } from "../providers/AuthProvider";
 import HamburgerMenu from "@/components/HamburgerMenu";
 
 const navLink = ({ isActive }: { isActive: boolean }) =>
-  `flex items-center gap-3 rounded-xl px-3 py-2 transition ${
+  `card-hover flex items-center gap-3 rounded-xl px-3 py-2 transition ${
     isActive
       ? "bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300 transition-colors duration-500"
       : "hover:bg-gray-100 dark:hover:bg-white/5 text-gray-700 dark:text-gray-200 transition-colors duration-500"
