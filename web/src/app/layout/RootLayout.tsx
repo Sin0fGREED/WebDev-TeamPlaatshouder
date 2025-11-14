@@ -8,10 +8,10 @@ import HamburgerMenu from "@/components/HamburgerMenu";
 
 const navLink =
   ({ isActive }: { isActive: boolean }) =>
-  `flex items-center gap-3 rounded-xl px-3 py-2 transition ${
+  `flex items-center gap-3 px-3 py-2 overflow-hidden transition-all duration-150 ease-in-out ${
     isActive 
-    ? "bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300 transition-colors duration-500"
-    : "hover:bg-gray-100 dark:hover:bg-white/5 text-gray-700 dark:text-gray-200 transition-colors duration-500"}`;
+    ? "rounded-xl hover:text-white bg-blue-500 dark:bg-white-700/15 text-white dark:bg-white/10 dark:text-white shadow-sm"
+    : "hover:rounded-xl hover:bg-blue-900/10 hover:text-blue-700 nav-inactive"}`;
 
 export default function RootLayout() {
   const { logout } = useAuth();
@@ -52,9 +52,7 @@ export default function RootLayout() {
               {!collapsed && 'Create Event'}
             </NavLink>
 
-            <div className="mt-4 px-2 text-xs uppercase text-gray-400">
-              Settings
-            </div>
+            <div className="mt-4 px-2 text-xs uppercase text-gray-400">Settings</div>
             <NavLink to="/account" className={navLink}>
               <Cog className="h-5 w-5" />
               {!collapsed && 'Account Settings'}
@@ -82,11 +80,10 @@ export default function RootLayout() {
                 <NavLink
                   to="/dashboard"
                   className={({ isActive }) =>
-                    `relative group inline-block text-sm px-2 py-1 ${
+                    `relative group inline-block overflow-hidden text-sm px-2 py-1 transition-all duration-150 ease-in-out ${
                       isActive
-                        ? "text-blue-600 dark:text-blue-300 transition-colors duration-500"
-                        : "text-gray-600 dark:text-gray-300 transition-colors duration-500"
-                    }`
+                        ? "rounded-xl hover:text-white bg-blue-500 dark:bg-white-700/15 text-white dark:bg-white/10 dark:text-white shadow-sm"
+                        : "hover:rounded-xl hover:bg-blue-900/10 hover:text-blue-700 nav-inactive text-gray-600 dark:text-gray-300"}`
                   }
                 >
                   Dashboard
@@ -98,13 +95,11 @@ export default function RootLayout() {
                 <NavLink
                   to="/calendar"
                   className={({ isActive }) =>
-                    `relative group inline-block text-sm px-2 py-1 ${
+                    `relative group inline-block overflow-hidden text-sm px-2 py-1 transition-all duration-150 ease-in-out ${
                       isActive
-                        ? "text-blue-600 dark:text-blue-300 transition-colors duration-500"
-                        : "text-gray-600 dark:text-gray-300 transition-colors duration-500"
-                    }`
-                  }
-                >
+                        ? "rounded-xl hover:text-white bg-blue-500 dark:bg-white-700/15 text-white dark:bg-white/10 dark:text-white shadow-sm"
+                        : "hover:rounded-xl hover:bg-blue-900/10 hover:text-blue-700 nav-inactive text-gray-600 dark:text-gray-300"}`
+                  }>
                   Calendar
                   <span
                     aria-hidden="true"
@@ -114,11 +109,10 @@ export default function RootLayout() {
                 <NavLink
                   to="/presence"
                   className={({ isActive }) =>
-                    `relative group inline-block text-sm px-2 py-1 ${
+                    `relative group inline-block overflow-hidden text-sm px-2 py-1 transition-all duration-150 ease-in-out ${
                       isActive
-                        ? "text-blue-600 dark:text-blue-300 transition-colors duration-500"
-                        : "text-gray-600 dark:text-gray-300 transition-colors duration-500"
-                    }`
+                        ? "rounded-xl hover:text-white bg-blue-500 dark:bg-white-700/15 text-white dark:bg-white/10 dark:text-white shadow-sm"
+                        : "hover:rounded-xl hover:bg-blue-900/10 hover:text-blue-700 nav-inactive text-gray-600 dark:text-gray-300"}`
                   }
                 >
                   Team presence
@@ -131,7 +125,7 @@ export default function RootLayout() {
               <div className="flex items-center gap-3">
                 <NavLink
                   to="/events/new"
-                  className="hidden sm:inline-flex items-center gap-2 rounded-xl px-3 py-2 bg-blue-600 text-white hover:bg-blue-700"
+                  className="hidden sm:inline-flex items-center gap-2 rounded-xl px-3 py-2 bg-blue-600 text-white hover:bg-blue-700 transform transition-all duration-150 ease-out hover:-translate-y-1 hover:scale-105 hover:shadow-xl"
                 >
                   <Plus className="h-4 w-4" /> New Event
                 </NavLink>
@@ -141,7 +135,7 @@ export default function RootLayout() {
           </div>
 
           {/* Floating New Event button for small screens / quick access */}
-          <NavLink to="/events/new" className="fixed right-4 top-4 z-50 inline-flex items-center gap-2 rounded-full px-4 py-2 btn-accent shadow-lg sm:hidden" aria-label="New Event">
+          <NavLink to="/events/new" className="fixed right-4 top-4 z-50 inline-flex items-center gap-2 rounded-full px-4 py-2 btn-accent shadow-lg sm:hidden transform transition-all duration-150 ease-out hover:-translate-y-1 hover:scale-105 hover:shadow-xl" aria-label="New Event">
             <Plus className="h-4 w-4" /> New Event
           </NavLink>
 

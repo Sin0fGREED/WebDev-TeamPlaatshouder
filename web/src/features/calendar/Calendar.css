@@ -1,17 +1,13 @@
-/* calendar.css */
-/* Base slot height variable; changed by zoom buttons */
 :root { --fc-slot-h: 28px; }
 
-/* Project palette (from provided image) */
 :root {
 	--oc-bg-dark: #222831;    /* very dark charcoal */
 	--oc-dark-gray: #3f4448;  /* muted dark gray */
-	--oc-teal: #00bfbf;       /* teal band */
+	--oc-teal: rgb(0, 191, 191);       /* teal band */
 	--oc-light: #f0f0f0;      /* light neutral */
 	--oc-foreground: #ffffff; /* text on dark/teal */
 }
 
-/* Use the design tokens defined in App.css when available */
 :root {
   --radius-sm: var(--radius-sm, 6px);
   --radius-md: var(--radius-md, 10px);
@@ -19,27 +15,20 @@
   --muted: var(--muted, #6b7280);
 }
 
-/* Make the vertical grid taller per slot */
 .fc .fc-timegrid-slot,
 .fc .fc-timegrid-slot-lane,
-.fc .fc-timegrid-axis { height: var(--fc-slot-h); }
+.fc .fc-timegrid-axis { height: var(--fc-slot-h); transition: height 180ms ease; }
 
-/* Ensure the event box isn't squashed for short events */
-.fc .fc-timegrid-event { min-height: calc(var(--fc-slot-h) + 8px); }
+.fc .fc-timegrid-event { min-height: var(--fc-slot-h); box-sizing: border-box; }
 
-/* Optional: a touch more padding inside events */
 .fc .fc-timegrid-event .fc-event-main { padding: 2px 4px; }
-
-/* Optional: prevent content clipping a bit */
 
 .fc .fc-event-main-frame { overflow: visible; }
 
-/* --- Apply the palette to calendar UI (minimal, non-invasive) --- */
 /* Make the time axis darker to match the top bands */
 .fc { background: var(--card); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); overflow: hidden; }
-.fc .fc-timegrid-axis { background: var(--palette-mid); color: var(--muted); }
+.fc .fc-timegrid-axis { background: var(--palette-mid); color: var(--text); }
 
-/* Slight background for the day columns to separate content */
 .fc .fc-timegrid-col { background: linear-gradient(180deg, transparent, rgba(0,0,0,0.01)); }
 
 /* Header / toolbar: dark bar using the darkest color */
@@ -47,12 +36,7 @@
 .fc .fc-toolbar .fc-button, .fc .fc-toolbar button { color: var(--palette-light); border-color: rgba(255,255,255,0.06); }
 .fc .fc-toolbar .fc-toolbar-title { font-weight: 600; color: var(--palette-light); }
 
-/* Style our events (we add `oc-event` via eventClassNames).
-	 Strategy: make the outer container neutral and let only
-	 `.fc-event-main` show the accent. Remove any background/shadow
-	 from nested frames to avoid stacked/ghosted visuals. */
 .fc .oc-event {
-	/* keep the wrapper neutral so FullCalendar's internal frames don't stack */
 	background: transparent !important;
 	border: 0 !important;
 	padding: 0 !important;
@@ -60,25 +44,56 @@
 
 .fc .oc-event .fc-event-main {
 	display: block !important;
-	background: var(--accent) !important;
-	color: #000000 !important; /* dark text on bright teal for contrast */
-	border-radius: var(--radius-sm) !important;
+	background: #2b7fff !important; /* medium blue */
+	color: #ffffff !important; /* white text for contrast */
+	border-radius: 12px !important;
 	box-shadow: 0 2px 6px rgba(0,0,0,0.08) !important;
-	padding: 6px 8px !important;
+	padding: 6px 8px !important; /* restore a bit more padding now that slots are taller */
 	font-size: 12px !important;
 	line-height: 1.1 !important;
 	overflow: hidden !important;
 	z-index: 3 !important;
-	border: 1px solid rgb(0, 0, 0) !important;
-    background-color: rgba(3, 253, 252) !important;
+	border: 1px solid rgba(0,0,0,0.06) !important;
+	position: relative !important;
+	transition: transform 180ms cubic-bezier(.2,.9,.3,1), box-shadow 180ms ease;
 }
 
-html:not(.dark) .fc .fc-button,
+/* inline attendee badges shown under the time/meta */
+.fc .oc-event .fc-event-main .attendees-inline { z-index: 6; }
+.fc .oc-event .fc-event-main .attendees-inline > div { box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+
+/* Dark mode: slightly different blue for events */
+html.dark .fc .oc-event .fc-event-main,
+html.dark .fc .fc-daygrid-event .fc-event-main,
+html.dark .fc .fc-daygrid-event,
+html.dark .fc .fc-daygrid-event-harness .fc-daygrid-event,
+html.dark .fc .fc-daygrid-event a,
+html.dark .fc .fc-daygrid-event .fc-event-title {
+	background: #004a6e !important;
+	color: #ffffff !important;
+}
+
+/* Ensure month/day-grid events use the same blue styling */
+.fc .fc-daygrid-event .fc-event-main,
+.fc .fc-daygrid-event .fc-event-title {
+	background: #2b7fff !important;
+	color: #ffffff !important;
+	border-radius: 12px !important;
+	padding: 4px 6px !important;
+	box-shadow: 0 2px 6px rgba(0,0,0,0.06) !important;
+}
+
+/* Use the primary text color (dark) for toolbar / button text in light mode so labels aren't greyed out */
 html:not(.dark) .fc .fc-button,
 html:not(.dark) .fc .fc-button:hover {
-	color: var(--muted);
-	background: rgb(255, 29, 29);
-	border: 1px solid rgb(0, 0, 0);
+	color: var(--text);
+	/* preserve any background/border from other rules; avoid forcing bright colors here */
+}
+
+/* Ensure toolbar titles and toolbar-scoped buttons use dark text in light mode */
+html:not(.dark) .fc .fc-toolbar .fc-button,
+html:not(.dark) .fc .fc-toolbar .fc-toolbar-title {
+	color: var(--text);
 }
 
 /* Ensure the small view buttons (month/week/day) are visible */
@@ -91,15 +106,80 @@ html:not(.dark) .fc .fc-button-primary.fc-button-active {
 	color: #001717 !important;
 }
 
-/* Add a soft light-blue hover for toolbar buttons (light mode) */
 html:not(.dark) .fc .fc-button:hover {
-	background: rgb(3, 253, 252) !important; /* light blue hover */
+	background: #2b7fff !important; /* light blue hover */
 	color: var(--accent) !important;
 }
 
 
-.fc .oc-event .fc-event-main:hover { transform: translateY(-2px); transition: transform 140ms ease; }
+.fc .oc-event .fc-event-main:hover {
+	transform: translateY(-4px) scale(1.02);
+	box-shadow: 0 10px 24px rgba(2,132,199,0.18) !important;
+}
+
+.fc .oc-event .fc-event-main::after {
+	content: "";
+	position: absolute;
+	left: 8px;
+	right: 8px;
+	bottom: 4px;
+	height: 6px;
+	background: rgba(2,132,199,0.16);
+	border-radius: 6px;
+	transform: scaleX(0);
+	transform-origin: center;
+	transition: transform 220ms cubic-bezier(.2,.9,.3,1), opacity 180ms ease;
+	opacity: 0;
+	pointer-events: none;
+}
+.fc .oc-event .fc-event-main:hover::after {
+	transform: scaleX(1);
+	opacity: 1;
+}
 
 
 .fc .oc-event .fc-event-main .meta { opacity: 0.9; font-size: 11px; }
+
+.fc .fc-daygrid-event,
+.fc .fc-daygrid-event-harness .fc-daygrid-event,
+.fc .fc-daygrid-event a,
+.fc .fc-daygrid-event .fc-event-main,
+.fc .fc-daygrid-event .fc-event-title {
+	background: #2b7fff !important;
+	color: #ffffff !important;
+	border-radius: 12px !important;
+	position: relative !important;
+}
+
+/* Make month events lift on hover and show the underline-shadow */
+.fc .fc-daygrid-event:hover,
+.fc .fc-daygrid-event a:hover,
+.fc .fc-daygrid-event .fc-event-main:hover {
+	transform: translateY(-4px) scale(1.02);
+	box-shadow: 0 10px 24px rgba(2,132,199,0.18) !important;
+}
+
+.fc .fc-daygrid-event::after,
+.fc .fc-daygrid-event .fc-event-main::after,
+.fc .fc-daygrid-event a::after {
+	content: "";
+	position: absolute;
+	left: 4px;
+	right: 4px;
+	bottom: 3px;
+	height: 6px;
+	background: rgba(2,132,199,0.14);
+	border-radius: 6px;
+	transform: scaleX(0);
+	transform-origin: center;
+	transition: transform 220ms cubic-bezier(.2,.9,.3,1), opacity 180ms ease;
+	opacity: 0;
+	pointer-events: none;
+}
+.fc .fc-daygrid-event:hover::after,
+.fc .fc-daygrid-event a:hover::after,
+.fc .fc-daygrid-event .fc-event-main:hover::after {
+	transform: scaleX(1);
+	opacity: 1;
+}
 

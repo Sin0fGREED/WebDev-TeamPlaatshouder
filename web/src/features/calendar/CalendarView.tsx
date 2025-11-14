@@ -19,10 +19,11 @@ export default function CalendarView() {
 
   // --- Zoom state ---
   // slotHeight controls visual height; slotDuration controls grid granularity
-  const [zoom, setZoom] = useState(2); // 1x, 1.25x, 1.5x…
-  const [slotDuration, setSlotDuration] = useState<'00:15:00' | '00:30:00' | '01:00:00'>('00:30:00')
+  // Default zoom 1.5 => 150%
+  const [zoom, setZoom] = useState(1.5); // 1x, 1.25x, 1.5x…
+  // Default granularity: 60 minutes
+  const [slotDuration, setSlotDuration] = useState<'00:15:00' | '00:30:00' | '01:00:00'>('01:00:00')
 
-  const slotHeightPx = useMemo(() => Math.round(28 * zoom), [zoom]);
 
   // derive min/max hours from events currently in view
   const { slotMinTime, slotMaxTime } = useMemo(() => {
@@ -30,11 +31,11 @@ export default function CalendarView() {
     const baseMax = 20;     // your “working hours” end
     if (!events?.length) return { slotMinTime: `${String(baseMin).padStart(2, '0')}:00:00`, slotMaxTime: `${baseMax}:00:00` };
 
-    const starts = events.map(e => new Date(e.startUtc));
-    const ends = events.map(e => new Date(e.endUtc ?? e.startUtc));
+  const starts = events.map(e => new Date(e.startUtc));
+  const ends = events.map(e => new Date(e.endUtc ?? e.startUtc));
 
-    const earliest = Math.min(...starts.map(d => d.getHours()));
-    const latest = Math.max(...ends.map(d => d.getHours() + (ends[0].getMinutes() ? 1 : 0)));
+    const earliest = Math.min(...starts.map(d => d.getUTCHours()));
+    const latest = Math.max(...ends.map(d => d.getUTCHours() + (ends[0].getUTCMinutes() ? 1 : 0)));
 
     const minHour = Math.min(baseMin, earliest);
     const maxHour = Math.max(baseMax, latest + 1); // +1 to avoid clipping the end
@@ -45,21 +46,67 @@ export default function CalendarView() {
     };
   }, [events]);
 
-  useEffect(() => {
-    // Update the CSS variable so our CSS rules take effect
-    document.documentElement.style.setProperty('--fc-slot-h', `${slotHeightPx}px`);
-  }, [slotHeightPx]);
+
 
   const formattedEvents = useMemo(() => (events ?? []).map((e) => ({
     id: e.id,
     title: e.title,
-    start: e.startUtc,     // FullCalendar wants `start`/`end`
+    start: e.startUtc,
     end: e.endUtc,
     extendedProps: {
       roomId: e.roomId,
       attendees: [{ id: '123', name: 'Feyo' }],
     },
   })), [events]);
+  const [computedSlotHeight, setComputedSlotHeight] = useState<number | null>(null);
+
+  // compute estimated slot height: small by default, increase only if multiple attendees
+  const slotEstimatedPx = useMemo(() => {
+    const base = 28; // keep slots compact by default
+    const maxAttendees = (formattedEvents ?? []).reduce((mx, ev) => Math.max(mx, (ev.extendedProps?.attendees?.length ?? 0)), 0);
+    const metaExtra = 6;
+    const extraPerAttendee = 16;
+    // only add attendee-driven height when there's more than one attendee
+    const attendeeExtra = Math.max(0, maxAttendees - 1) * extraPerAttendee;
+    const desired = base + metaExtra + attendeeExtra;
+    const clamped = Math.min(desired, 120); // avoid excessive heights
+    return Math.round(clamped * zoom);
+  }, [zoom, formattedEvents]);
+  useEffect(() => {
+    const final = Math.max(slotEstimatedPx, computedSlotHeight ?? 0);
+    document.documentElement.style.setProperty('--fc-slot-h', `${final}px`);
+  }, [slotEstimatedPx, computedSlotHeight]);
+
+
+  // parse slotDuration 'HH:MM:SS' -> milliseconds
+  const slotDurationMs = useMemo(() => {
+    const parts = slotDuration.split(':').map(Number);
+    return ((parts[0] || 0) * 3600 + (parts[1] || 0) * 60 + (parts[2] || 0)) * 1000;
+  }, [slotDuration]);
+
+  const onEventMount = (info: any) => {
+    try {
+      const el = info.el.querySelector('.fc-event-main') || info.el;
+      if (!el) return;
+  // content height we need to fit
+      const contentH = el.scrollHeight || el.offsetHeight;
+      // compute event duration in milliseconds
+      const start = info.event.start as Date | null;
+      const end = info.event.end as Date | null;
+      const durationMs = Math.max(1, ((end?.getTime() ?? start?.getTime() ?? 0) - (start?.getTime() ?? 0)));
+      const slots = Math.max(1, Math.round(durationMs / Math.max(1, slotDurationMs)));
+      const neededPerSlot = Math.ceil(contentH / slots);
+      setComputedSlotHeight((prev) => Math.max(prev ?? 0, Math.round(neededPerSlot * zoom)));
+    } catch (e) {
+      // ignore measurement errors
+    }
+  };
+
+  useEffect(() => {
+    if (computedSlotHeight) {
+      document.documentElement.style.setProperty('--fc-slot-h', `${computedSlotHeight}px`);
+    }
+  }, [computedSlotHeight]);
 
   return (
     <div className="p-6 w-full">
@@ -94,7 +141,14 @@ export default function CalendarView() {
       </div>
 
       <FullCalendar
+        locale="en-GB"
+        timeZone="UTC"
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+        views={{
+          timeGridWeek: {
+            titleFormat: { day: 'numeric', month: 'short', year: 'numeric' },
+          },
+        }}
         initialView="timeGridWeek"
         headerToolbar={{ left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' }}
         events={formattedEvents}
@@ -107,6 +161,9 @@ export default function CalendarView() {
         datesSet={(arg) => setRange({ from: arg.startStr, to: arg.endStr })}
         height="auto"
 
+  /* show times as 24-hour with leading zeros e.g. 06:00 */
+  slotLabelFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
+
         /* Make the visible window smaller to increase vertical space per slot */
         slotMinTime={slotMinTime}
         slotMaxTime={slotMaxTime}
@@ -115,6 +172,8 @@ export default function CalendarView() {
         /* Granularity */
         slotDuration={slotDuration}
         slotLabelInterval={slotDuration}
+
+  eventDidMount={onEventMount}
 
         /* Helps when events overlap */
         eventOverlap={true}
@@ -129,8 +188,9 @@ const CustomEventContent = ({ eventInfo }: { eventInfo: EventContentArg }) => {
   const { title } = eventInfo.event;
   const { roomId, attendees = [] } = eventInfo.event.extendedProps as { roomId?: string, attendees?: { id: string, name: string }[] };
 
+  // format times in UTC to match the calendar's timezone
   const fmt = (d?: Date) =>
-    d ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
+    d ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC' }) : '';
 
 
   return (
@@ -153,17 +213,12 @@ const CustomEventContent = ({ eventInfo }: { eventInfo: EventContentArg }) => {
       )}
 
       {!!attendees.length && (
-        <div className="mt-2 flex items-center -space-x-2">
-          {attendees.slice(0, 3).map((att) => (
+        <div className="mt-2 flex items-center space-x-2 attendees-inline">
+          {attendees.map((att) => (
             <div key={att.id} className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[11px] text-white">
               {att.name[0]}
             </div>
           ))}
-          {attendees.length > 3 && (
-            <div className="w-6 h-6 rounded-full bg-[color:var(--accent)] flex items-center justify-center text-white text-[10px]">
-              +{attendees.length - 3}
-            </div>
-          )}
         </div>
       )}
     </div>
