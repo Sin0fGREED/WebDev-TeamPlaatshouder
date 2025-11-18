@@ -23,7 +23,7 @@ public sealed class CalendarEvent
 
 public sealed class Attendee
 {
-    public Guid CalendarEventId { get; set; }
+    public Guid EventId { get; set; }
     public CalendarEvent Event { get; set; } = default!;
 
     public Guid EmployeeId { get; set; }

@@ -13,8 +13,15 @@ export default function ViewEventPage() {
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-300">
           {event?.startUtc} - {event?.endUtc}
         </p>
+        {event?.attendees?.map((a) => (
+          <div key={a.id} className="card p-4">
+            <div className="mb-2 text-base font-medium">{a.employee.user.email}</div>
+            <div className="mb-2 text-base font-medium">{a.employee.role}</div>
+            {a.response}
+          </div>
+        ))}
       </div>
-    </div>
+    </div >
   );
 }
 

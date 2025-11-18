@@ -18,12 +18,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         // Attendee composite key
         b.Entity<Attendee>()
-            .HasKey(a => new { a.CalendarEventId, a.EmployeeId });
+            .HasKey(a => new { a.EventId, a.EmployeeId });
 
         b.Entity<Attendee>()
             .HasOne(a => a.Event)
             .WithMany(e => e.Attendees)
-            .HasForeignKey(a => a.CalendarEventId);
+            .HasForeignKey(a => a.EventId);
 
         b.Entity<Attendee>()
             .HasOne(a => a.Employee)

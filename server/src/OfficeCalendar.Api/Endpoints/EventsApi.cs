@@ -22,7 +22,7 @@ public static class EventsApi
         {
             var items = await db.Events
                 .Where(e => e.StartUtc < to.UtcDateTime && e.EndUtc > from.UtcDateTime)
-                .Select(e => new EventDto(e.Id, e.Title, e.StartUtc, e.EndUtc, e.RoomId))
+                .Select(e => new EventDto(e.Id, e.Title, e.StartUtc, e.EndUtc, e.RoomId, e.Attendees))
                 .ToListAsync(ct);
 
             return Results.Ok(items);
@@ -33,7 +33,7 @@ public static class EventsApi
         {
             var item = await db.Events
                 .Where(e => e.Id == event_id)
-                .Select(e => new EventDto(e.Id, e.Title, e.StartUtc, e.EndUtc, e.RoomId)).FirstAsync();
+                .Select(e => new EventDto(e.Id, e.Title, e.StartUtc, e.EndUtc, e.RoomId, e.Attendees)).FirstAsync();
 
             return Results.Ok(item);
 
@@ -72,13 +72,14 @@ public static class EventsApi
                 StartUtc = req.StartUtc,
                 EndUtc = req.EndUtc,
                 RoomId = req.RoomId,
+                Attendees = req.Attendees,
                 OrganizerId = organizerId
             };
 
             db.Events.Add(e);
             await db.SaveChangesAsync();
 
-            var dto = new EventDto(e.Id, e.Title, e.StartUtc, e.EndUtc, e.RoomId);
+            var dto = new EventDto(e.Id, e.Title, e.StartUtc, e.EndUtc, e.RoomId, e.Attendees);
             await hub.Clients.All.SendAsync("event:created", dto);
             return Results.Created($"/api/events/{e.Id}", dto);
         }).RequireAuthorization();
@@ -99,24 +100,25 @@ public static class EventsApi
                 Console.WriteLine($"Could not parse user id: {userIdString}");
                 return Results.Unauthorized();
             }
-            if (userId != eventId)
-                return Results.Forbid();
 
             var e = await db.Events.FindAsync(eventId);
             if (e is null)
                 return Results.NotFound();
 
+            if (userId != e.OrganizerId)
+                return Results.Forbid();
+
             e.Title = req.Title;
             e.Description = req.Description;
             e.Attendees = req.Attendees;
             e.StartUtc = req.StartUtc;
-            e.EndUtc = req.StartUtc;
+            e.EndUtc = req.EndUtc;
 
             db.Events.Entry(e).State = EntityState.Modified;
 
             await db.SaveChangesAsync();
 
-            var dto = new EventDto(e.Id, e.Title, e.StartUtc, e.EndUtc, e.RoomId);
+            var dto = new EventDto(e.Id, e.Title, e.StartUtc, e.EndUtc, e.RoomId, e.Attendees);
             await hub.Clients.All.SendAsync("event:created", dto);
             return Results.Created($"/api/events/{e.Id}", dto);
 
