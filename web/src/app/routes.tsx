@@ -3,6 +3,7 @@ import RootLayout from "./layout/RootLayout";
 import DashboardPage from "../features/dashboard/pages/DashboardPage"
 import PresencePage from "../features/presence/PresencePage";
 import CreateEventPage from "../features/events/CreateEventsPage";
+import AccountSettings from "../features/account/AccountSettings";
 import LoginPage from "../features/auth/pages/LoginPage";
 import RequireAuth from "./providers/RequireAuth";
 import CalendarPage from "../features/calendar/CalendarPage";

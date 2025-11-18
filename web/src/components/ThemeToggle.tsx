@@ -1,16 +1,18 @@
-import { Moon, Sun } from "lucide-react";
-import { useTheme } from "../theme/ThemeProvider";
+import { Button } from "./ui/button";
+import { FaSun, FaMoon } from "react-icons/fa";
+import { useTheme } from "next-themes";
 
-export default function ThemeToggle() {
-  const { resolved, toggle } = useTheme();
+export function ThemeToggle() {
+  const { theme, setTheme } = useTheme();
   return (
-    <button
-      onClick={toggle}
-      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border/60 bg-card hover:bg-muted transition"
-      aria-label="Toggle theme"
-      title="Toggle theme"
+    <Button
+      variant="outline"
+      size="icon"
+      className="rounded-full"
+      onClick={() => setTheme(theme === "light" ? "dark" : "light")}
     >
-      {resolved === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-    </button>
+      <FaSun className="absolute h-10 w-10 rotate-0 scale-100 dark:-rotate-90 dark:scale-0"></FaSun>
+      <FaMoon className="absolute h-10 w-10 rotate-90 scale-0 dark:-rotate-0 dark:scale-100"></FaMoon>
+    </Button>
   );
 }
