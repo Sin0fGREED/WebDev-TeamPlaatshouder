@@ -56,6 +56,7 @@ export default function CreateEventPage() {
       return;
     }
 
+    //public record EventDto(Guid Id, string Title, DateTime StartUtc, DateTime EndUtc, Guid? roomId)
     const payload = {
       title: title.trim(),
       startUtc: toIsoFromLocalInput(startLocal),

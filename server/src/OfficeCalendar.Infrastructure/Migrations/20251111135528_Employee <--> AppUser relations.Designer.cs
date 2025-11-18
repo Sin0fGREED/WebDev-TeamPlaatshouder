@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OfficeCalendar.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using OfficeCalendar.Infrastructure.Persistence;
 namespace OfficeCalendar.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251111135528_Employee <--> AppUser relations")]
+    partial class EmployeeAppUserrelations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,7 +60,7 @@ namespace OfficeCalendar.Infrastructure.Migrations
 
             modelBuilder.Entity("OfficeCalendar.Domain.Entities.Attendee", b =>
                 {
-                    b.Property<Guid>("EventId")
+                    b.Property<Guid>("CalendarEventId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("EmployeeId")
@@ -67,7 +70,7 @@ namespace OfficeCalendar.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("EventId", "EmployeeId");
+                    b.HasKey("CalendarEventId", "EmployeeId");
 
                     b.HasIndex("EmployeeId");
 
@@ -173,15 +176,15 @@ namespace OfficeCalendar.Infrastructure.Migrations
 
             modelBuilder.Entity("OfficeCalendar.Domain.Entities.Attendee", b =>
                 {
-                    b.HasOne("OfficeCalendar.Domain.Entities.Employee", "Employee")
-                        .WithMany("Attending")
-                        .HasForeignKey("EmployeeId")
+                    b.HasOne("OfficeCalendar.Domain.Entities.CalendarEvent", "Event")
+                        .WithMany("Attendees")
+                        .HasForeignKey("CalendarEventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("OfficeCalendar.Domain.Entities.CalendarEvent", "Event")
-                        .WithMany("Attendees")
-                        .HasForeignKey("EventId")
+                    b.HasOne("OfficeCalendar.Domain.Entities.Employee", "Employee")
+                        .WithMany("Attending")
+                        .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
