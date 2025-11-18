@@ -5,6 +5,74 @@
   text-align: center;
 }
 
+
+:root {
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-sm: 0 4px 12px rgba(2,6,23,0.06);
+  --shadow-md: 0 10px 30px rgba(2,6,23,0.08);
+  --muted: #6b7280;
+  --bg: #f6f7f8;
+}
+
+/* Light theme tokens (use the provided palette colors) */
+:root {
+  /* Exact palette chosen to match the provided artwork */
+  --palette-dark: rgb(15, 23, 34);    /* deep navy/charcoal (top band) */
+  --palette-mid:  rgb(43, 52, 57);    /* mid charcoal (second band) */
+  --palette-teal: rgb(3, 253, 252);    /* exact teal requested */
+  --palette-light:rgb(237, 240, 241);    /* subtle light band */
+
+  /* semantic tokens (light theme defaults) */
+  --bg:    #f6f7f8;
+  --panel: #e9eef0;
+  --card:  #ffffff;
+  --text:  #0b1220;
+  --muted: #6b7280;
+  --accent: var(--palette-teal);
+}
+
+/* handy accent opacities */
+:root {
+  --accent-08: rgba(0,191,191,0.08);
+  --accent-12: rgba(0,191,191,0.12);
+}
+
+/* Dark theme tokens: applied when `.dark` class is present on <html> */
+.dark {
+  --bg:    var(--palette-dark);
+  --panel: var(--palette-mid);
+  --card:  #1b2a30; /* card surface in dark mode */
+  --text:  #e6eef2;
+  --muted: #9aa3a8;
+  --accent: var(--palette-teal);
+}
+
+/* Accent shades */
+:root {
+  --accent-600: var(--accent);
+  --accent-400: #66e0e0;
+}
+
+html, body {
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Utility classes that use semantic tokens so colors follow theme */
+.btn-accent {
+  background: var(--accent);
+  color: #001717; /* dark text for high contrast on bright teal */
+  border: none;
+}
+.btn-accent:hover { filter:brightness(0.98); }
+
+.brand { background: var(--accent); }
+
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -36,6 +104,71 @@
 .card {
   padding: 2em;
 }
+
+.card.rounded { border-radius: var(--radius-md); box-shadow: var(--shadow-sm); background: white; }
+
+/* Accessibility helpers */
+.access-large-text { font-size: 18px; }
+.access-high-contrast { filter: none; }
+.access-high-contrast :root, .access-high-contrast { --text: #071524; --card: #ffffff; --panel: #f6f7f8; }
+.access-reduced-motion *, .access-reduced-motion *::before, .access-reduced-motion *::after { transition: none !important; animation: none !important; }
+
+/* Magnifier accessibility mode: increases base scale slightly and shows a
+   floating magnifier indicator to communicate the feature is active. The
+   magnifier indicator is purely decorative and uses pointer-events:none. */
+.access-magnifier {
+  font-size: 20px; /* slight increase for better legibility */
+}
+.access-magnifier body, .access-magnifier html { cursor: zoom-in; }
+.access-magnifier::after {
+  content: '';
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(3,253,252,0.09);
+  border: 2px solid var(--accent);
+  box-shadow: var(--shadow-sm);
+  z-index: 9999;
+  pointer-events: none;
+  display: block;
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24'%3E%3Ccircle cx='10' cy='10' r='6' stroke='%23001717' stroke-width='2' fill='none'/%3E%3Cpath d='M21 21l-4.35-4.35' stroke='%23001717' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Slightly stronger large text rule when magnifier is enabled */
+.access-magnifier .access-large-text { font-size: 20px; }
+
+/* Magnifier lens styles */
+.magnifier-lens {
+  position: fixed;
+  pointer-events: none;
+  border-radius: 50%;
+  overflow: hidden;
+  z-index: 9998;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.14);
+  border: 2px solid rgba(3,253,252,0.22);
+}
+.magnifier-inner {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+}
+.magnifier-lens img { display: none; }
+
+/* Nav active/inactive helpers */
+.nav-active { background: var(--accent-08); color: var(--accent); }
+.dark .nav-active { background: color-mix(in srgb, var(--accent) 12%, black 88%); color: var(--accent); }
+.nav-inactive { color: var(--muted); }
+.nav-inactive:hover, .nav-inactive.nav-hover:hover { background: rgba(0,0,0,0.03); }
+
+.text-accent { color: var(--accent); }
+.dark .text-accent { color: var(--accent); }
 
 .read-the-docs {
   color: #888;

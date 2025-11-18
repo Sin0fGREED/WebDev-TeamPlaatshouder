@@ -6,7 +6,7 @@
 
 /* ===== App tokens & dark mode ===== */
 :root {
-  --bg: 255 255 255; /* light bg */
+  --bg: 237 240 241; /* light bg */
   --fg: 17 24 39; /* gray-900 */
   --panel: 249 250 251; /* gray-50 */
   --muted: oklch(0.97 0 0); /* gray-100 */
@@ -105,13 +105,12 @@ body {
 /* ===== FullCalendar dark mode tweaks ===== */
 .dark .fc {
   --fc-border-color: rgba(255, 255, 255, 0.08);
-  --fc-neutral-bg-color: rgba(255, 255, 255, 0.03);
+  --fc-neutral-bg-color: rgba(212, 58, 58, 0.03);
   --fc-page-bg-color: rgb(17, 24, 39);
   --fc-list-event-hover-bg-color: rgba(255, 255, 255, 0.05);
-  --fc-today-bg-color: rgba(96, 165, 250, 0.15);
+  --fc-today-bg-color: rgb(15, 23, 34);
   color: rgb(229, 231, 235);
 }
-
 /* Navigation underline styling */
 .nav-underline {
   position: absolute;
@@ -142,6 +141,12 @@ body {
 
 .dark .fc .fc-toolbar-title {
   color: rgb(229, 231, 235);
+}
+.group:hover .nav-underline {
+  transform: scaleX(1);
+}
+.dark .fc .fc-toolbar-title {
+  color: rgb(255, 255, 255);
 }
 .dark .fc-theme-standard td,
 .dark .fc-theme-standard th {
