@@ -5,6 +5,7 @@ import Magnifier from "../../components/Magnifier";
 import { useAuth } from "../providers/AuthProvider";
 import { useEffect, useState } from "react";
 import HamburgerMenu from "@/components/HamburgerMenu";
+import NotificationIcon from "@/components/NotificationIcon";
 
 const navLink =
   ({ isActive }: { isActive: boolean }) =>
@@ -129,6 +130,7 @@ export default function RootLayout() {
                 >
                   <Plus className="h-4 w-4" /> New Event
                 </NavLink>
+                <NotificationIcon />
                 <HamburgerMenu />
               </div>
             </div>
