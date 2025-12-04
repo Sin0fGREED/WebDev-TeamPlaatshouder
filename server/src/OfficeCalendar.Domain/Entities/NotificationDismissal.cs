@@ -10,6 +10,5 @@ public sealed class NotificationDismissal
     public bool IsRead { get; set; } = true;
     public DateTime DismissedAt { get; set; } = DateTime.UtcNow;
 
-    // nav props (optional)
     public Notification? Notification { get; set; }
 }

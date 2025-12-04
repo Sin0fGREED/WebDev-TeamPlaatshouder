@@ -11,7 +11,7 @@ public static class NotificationsApi
     public static RouteGroupBuilder MapNotificationsApi(this RouteGroupBuilder g)
     {
         // GET /api/notifications?page=1&pageSize=20
-        g.MapGet("", async (AppDbContext db, ClaimsPrincipal user, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] bool includeRead = false) =>
+        g.MapGet("", async (AppDbContext db, ClaimsPrincipal user, [FromQuery] int page = 1, [FromQuery] int pageSize = 20) =>
         {
             if (page < 1) page = 1;
             if (pageSize < 1) pageSize = 20;
@@ -23,20 +23,11 @@ public static class NotificationsApi
             Guid? userId = null;
             if (Guid.TryParse(userIdString, out var parsed)) userId = parsed;
 
-            // Return notifications that are either global (RecipientId null) or targeted to this user
-            // By default exclude notifications the user has marked read; includeRead=true returns everything
+            // Return recent notifications that are either global (RecipientId null) or targeted to this user
             var q = db.Notifications.AsQueryable();
             if (userId.HasValue)
             {
-                if (!includeRead)
-                {
-                    q = q.Where(n => (n.RecipientId == null || n.RecipientId == userId.Value)
-                                      && !db.NotificationDismissals.Any(nd => nd.NotificationId == n.Id && nd.UserId == userId.Value && nd.IsRead));
-                }
-                else
-                {
-                    q = q.Where(n => n.RecipientId == null || n.RecipientId == userId.Value);
-                }
+                q = q.Where(n => n.RecipientId == null || n.RecipientId == userId.Value);
             }
             else
             {
@@ -55,7 +46,7 @@ public static class NotificationsApi
                     n.Message,
                     n.EventId,
                     n.Timestamp,
-                    userId.HasValue && db.NotificationDismissals.Any(nd => nd.NotificationId == n.Id && nd.UserId == userId.Value && nd.IsRead)
+                    false
                 ))
                 .ToListAsync();
 
