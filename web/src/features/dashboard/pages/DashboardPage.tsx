@@ -2,7 +2,7 @@ import CalendarView from "../../calendar/CalendarView";
 
 export default function DashboardPage() {
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+    <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
       <section className="card p-6">
         <div className="mb-4 text-lg font-semibold">Monthly Calendar</div>
         <CalendarView />
