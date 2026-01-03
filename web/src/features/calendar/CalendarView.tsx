@@ -88,8 +88,9 @@ export default function CalendarView() {
 
         <div className="flex items-center gap-2">
           <label className="text-sm opacity-70">Granularity</label>
+
           <select
-            className="border rounded px-2 py-1 text-sm"
+            className="border rounded px-2 py-1 text-sm bg-white text-gray-900 dark:bg-zinc-900 dark:text-gray-100 border-gray-300 dark:border-white/10"
             value={slotDuration}
             onChange={(e) => setSlotDuration(e.target.value as any)}
           >
