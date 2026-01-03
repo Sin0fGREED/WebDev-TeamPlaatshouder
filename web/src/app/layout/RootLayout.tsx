@@ -1,6 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { LayoutDashboard, CalendarDays, UserCircle2, Plus, Cog, LogOut, Menu } from "lucide-react";
-import {ThemeToggle} from "../../components/ThemeToggle";
+import { ThemeToggle } from "../../components/ThemeToggle";
 import Magnifier from "../../components/Magnifier";
 import { useAuth } from "../providers/AuthProvider";
 import { useEffect, useState } from "react";
@@ -8,10 +8,9 @@ import HamburgerMenu from "@/components/HamburgerMenu";
 
 const navLink =
   ({ isActive }: { isActive: boolean }) =>
-  `flex items-center gap-3 px-3 py-2 overflow-hidden transition-all duration-150 ease-in-out ${
-    isActive 
-    ? "rounded-xl hover:text-white bg-blue-500 dark:bg-white-700/15 text-white dark:bg-white/10 dark:text-white shadow-sm"
-    : "hover:rounded-xl hover:bg-blue-900/10 hover:text-blue-700 nav-inactive"}`;
+    `flex items-center gap-3 px-3 py-2 overflow-hidden transition-all duration-150 ease-in-out ${isActive
+      ? "rounded-xl hover:text-white bg-blue-500 dark:bg-white-700/15 text-white dark:bg-white/10 dark:text-white shadow-sm"
+      : "hover:rounded-xl hover:bg-blue-900/10 hover:text-blue-700 nav-inactive"}`;
 
 export default function RootLayout() {
   const { logout } = useAuth();
@@ -25,7 +24,7 @@ export default function RootLayout() {
       <Magnifier />
       <div className="flex">
         {/* Sidebar */}
-  <aside className={`hidden md:flex sticky top-0 self-start ${collapsed ? 'w-20' : 'w-64'} h-screen flex-col gap-6 border-r border-border/60 bg-[rgb(var(--panel))] p-4 overflow-y-auto transition-width duration-200` }>
+        <aside className={`hidden md:flex sticky top-0 self-start ${collapsed ? 'w-20' : 'w-64'} h-screen flex-col gap-6 border-r border-border/60 bg-[rgb(var(--panel))] p-4 overflow-y-auto transition-width duration-200`}>
           <div className="flex items-center gap-0 px-3 pt-3">
             <div className="h-8 w-8 rounded-lg brand" />
             {!collapsed && <div className="font-semibold">Office Calendar</div>}
@@ -52,7 +51,7 @@ export default function RootLayout() {
               {!collapsed && 'Create Event'}
             </NavLink>
 
-            <div className="mt-4 px-2 text-xs uppercase text-gray-400">Settings</div>
+            <div className="mt-4 px-2 text-xs uppercase text-gray-400">{!collapsed && 'Settings'}</div>
             <NavLink to="/account" className={navLink}>
               <Cog className="h-5 w-5" />
               {!collapsed && 'Account Settings'}
@@ -80,10 +79,9 @@ export default function RootLayout() {
                 <NavLink
                   to="/dashboard"
                   className={({ isActive }) =>
-                    `relative group inline-block overflow-hidden text-sm px-2 py-1 transition-all duration-150 ease-in-out ${
-                      isActive
-                        ? "rounded-xl hover:text-white bg-blue-500 dark:bg-white-700/15 text-white dark:bg-white/10 dark:text-white shadow-sm"
-                        : "hover:rounded-xl hover:bg-blue-900/10 hover:text-blue-700 nav-inactive text-gray-600 dark:text-gray-300"}`
+                    `relative group inline-block overflow-hidden text-sm px-2 py-1 transition-all duration-150 ease-in-out ${isActive
+                      ? "rounded-xl hover:text-white bg-blue-500 dark:bg-white-700/15 text-white dark:bg-white/10 dark:text-white shadow-sm"
+                      : "hover:rounded-xl hover:bg-blue-900/10 hover:text-blue-700 nav-inactive text-gray-600 dark:text-gray-300"}`
                   }
                 >
                   Dashboard
@@ -95,10 +93,9 @@ export default function RootLayout() {
                 <NavLink
                   to="/calendar"
                   className={({ isActive }) =>
-                    `relative group inline-block overflow-hidden text-sm px-2 py-1 transition-all duration-150 ease-in-out ${
-                      isActive
-                        ? "rounded-xl hover:text-white bg-blue-500 dark:bg-white-700/15 text-white dark:bg-white/10 dark:text-white shadow-sm"
-                        : "hover:rounded-xl hover:bg-blue-900/10 hover:text-blue-700 nav-inactive text-gray-600 dark:text-gray-300"}`
+                    `relative group inline-block overflow-hidden text-sm px-2 py-1 transition-all duration-150 ease-in-out ${isActive
+                      ? "rounded-xl hover:text-white bg-blue-500 dark:bg-white-700/15 text-white dark:bg-white/10 dark:text-white shadow-sm"
+                      : "hover:rounded-xl hover:bg-blue-900/10 hover:text-blue-700 nav-inactive text-gray-600 dark:text-gray-300"}`
                   }>
                   Calendar
                   <span
@@ -109,10 +106,9 @@ export default function RootLayout() {
                 <NavLink
                   to="/presence"
                   className={({ isActive }) =>
-                    `relative group inline-block overflow-hidden text-sm px-2 py-1 transition-all duration-150 ease-in-out ${
-                      isActive
-                        ? "rounded-xl hover:text-white bg-blue-500 dark:bg-white-700/15 text-white dark:bg-white/10 dark:text-white shadow-sm"
-                        : "hover:rounded-xl hover:bg-blue-900/10 hover:text-blue-700 nav-inactive text-gray-600 dark:text-gray-300"}`
+                    `relative group inline-block overflow-hidden text-sm px-2 py-1 transition-all duration-150 ease-in-out ${isActive
+                      ? "rounded-xl hover:text-white bg-blue-500 dark:bg-white-700/15 text-white dark:bg-white/10 dark:text-white shadow-sm"
+                      : "hover:rounded-xl hover:bg-blue-900/10 hover:text-blue-700 nav-inactive text-gray-600 dark:text-gray-300"}`
                   }
                 >
                   Team presence
