@@ -66,7 +66,6 @@ export default function RootLayout() {
               <LogOut className="h-5 w-5" />
               {!collapsed && 'Logout'}
             </button>
-            <div className="mt-6 px-2 text-xs text-gray-400">Made with ♥</div>
           </div>
         </aside>
 
