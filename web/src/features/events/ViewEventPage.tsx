@@ -101,13 +101,12 @@ export default function ViewEventPage() {
 
         <div className="mt-4 space-y-3">
           {(event?.attendees ?? []).map((a) => {
-            const email = a.employee?.user?.email ?? "Unknown";
-            const role = a.employee?.role ?? "—";
-            const badge = responseLabel(a.response);
+            const email = a.email;
+            const badge = responseLabel(a.response.toString());
 
             return (
               <div
-                key={a.id}
+                key={a.userId}
                 className="flex items-center justify-between gap-4 rounded-2xl border border-border/60 bg-white/40 p-4 dark:bg-white/5"
               >
                 <div className="flex items-center gap-3 min-w-0">
@@ -120,7 +119,7 @@ export default function ViewEventPage() {
                   <div className="min-w-0">
                     <div className="font-medium truncate">{email}</div>
                     <div className="text-sm text-gray-500 dark:text-gray-300 truncate">
-                      {role}
+                      Employee
                     </div>
                   </div>
                 </div>

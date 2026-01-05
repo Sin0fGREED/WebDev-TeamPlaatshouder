@@ -4,7 +4,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { useNavigate } from "react-router-dom";
 import { useMemo, useState, useLayoutEffect, useRef, useCallback, useEffect } from 'react';
-import { useEvents } from '../events/api';
+import { AttendeeDto, useEvents } from '../events/api';
 import { EventContentArg } from '@fullcalendar/core';
 import "./Calendar.css"
 
@@ -198,8 +198,9 @@ const CustomEventContent = ({ eventInfo, zoom }: { eventInfo: EventContentArg; z
   const { title } = eventInfo.event;
   const { roomId, attendees = [] } = eventInfo.event.extendedProps as {
     roomId?: string,
-    attendees?: { id: string, name: string }[]
+    attendees?: AttendeeDto[]
   };
+
 
   const fmt = (d?: Date) =>
     d ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC' }) : '';
@@ -236,8 +237,8 @@ const CustomEventContent = ({ eventInfo, zoom }: { eventInfo: EventContentArg; z
       {showAll && !!attendees.length && (
         <div className="attendees-inline">
           {attendees.slice(0, 3).map((att) => (
-            <div key={att.id} className="attendee-badge" title={att.name}>
-              {att.name[0]}
+            <div key={att.userId} className="attendee-badge" title={att.email}>
+              {att?.email[0]?.toUpperCase()}
             </div>
           ))}
           {attendees.length > 3 && (

@@ -33,9 +33,9 @@ public static class EventsApi
                             e.StartUtc,
                             e.EndUtc,
                             e.RoomId,
-                            e.Attendees.Select(a => new AttendeeDto(
+                            e.Attendeese.Select(a => new AttendeeDto(
                                     a.UserId,
-                                    a.User.Email,
+                                    a.User.Email, // EF translates this; no Include needed
                                     a.Response
                                 ))
                                 .ToList()
@@ -49,8 +49,8 @@ public static class EventsApi
 
         // GET /api/events/{event_id}
         g.MapGet(
-                "/{event_id:guid}",
-                async (Guid event_id, AppDbContext db, CancellationToken ct) =>
+                "/{event_id}",
+                async (Guid event_id, AppDbContext db) =>
                 {
                     var item = await db
                         .Events.Where(e => e.Id == event_id)
@@ -60,16 +60,11 @@ public static class EventsApi
                             e.StartUtc,
                             e.EndUtc,
                             e.RoomId,
-                            e.Attendees.Select(a => new AttendeeDto(
-                                    a.UserId,
-                                    a.User.Email,
-                                    a.Response
-                                ))
-                                .ToList()
+                            e.Attendees
                         ))
-                        .FirstOrDefaultAsync(ct);
+                        .FirstAsync();
 
-                    return item is null ? Results.NotFound() : Results.Ok(item);
+                    return Results.Ok(item);
                 }
             )
             .RequireAuthorization();
@@ -108,114 +103,127 @@ public static class EventsApi
                         return Results.NotFound();
                     }
 
-                    var ev = new CalendarEvent
+                    var e = new CalendarEvent
                     {
                         Title = req.Title,
-                        Description = req.Description,
                         StartUtc = req.StartUtc,
                         EndUtc = req.EndUtc,
                         RoomId = req.RoomId,
                         OrganizerId = organizerId,
                     };
 
-                    db.Events.Add(ev);
+                    db.Events.Add(e);
                     await db.SaveChangesAsync();
 
-                    Console.WriteLine(
-                        $"CreateEvent: attendees in request = {req.Attendees?.Count ?? 0}"
-                    );
+                    // Create attendees explicitly with correct EventId and default response
+                    var distinctUserIds = (req.Attendees ?? new List<CreateAttendeeDto>())
+                        .Select(a => a.UserId)
+                        .Distinct()
+                        .ToList();
 
-                    foreach (var uid in req.Attendees.Select(a => a.UserId).Distinct())
+                    foreach (var uid in distinctUserIds)
                     {
+                        // optional: validate user exists
+                        var exists = await db.Users.AnyAsync(u => u.Id == uid, ct);
+                        if (!exists)
+                            continue; // or return BadRequest
+
                         db.Attendees.Add(
                             new Attendee
                             {
-                                CalendarEventId = ev.Id,
+                                EventId = ev.Id,
                                 UserId = uid,
                                 Response = AttendeeResponse.Pending,
                             }
                         );
                     }
+
                     await db.SaveChangesAsync();
 
-                    // build DTO for response + SignalR
-                    var dto = await db
-                        .Events.Where(e => e.Id == ev.Id)
-                        .Select(e => new EventDto(
-                            e.Id,
-                            e.Title,
-                            e.StartUtc,
-                            e.EndUtc,
-                            e.RoomId,
-                            e.Attendees.Select(a => new AttendeeDto(
-                                    a.UserId,
-                                    a.User.Email,
-                                    a.Response
-                                ))
-                                .ToList()
-                        ))
-                        .FirstAsync();
+                    //Reload with attendee users for DTO (so user != null)
+                    var created = await db
+                        .Events.AsNoTracking()
+                        .Include(e => e.Attendees)
+                            .ThenInclude(a => a.User)
+                        .FirstAsync(e => e.Id == ev.Id, ct);
+
+                    var dto = new EventDto(
+                        created.Id,
+                        created.Title,
+                        created.StartUtc,
+                        created.EndUtc,
+                        created.RoomId,
+                        created
+                            .Attendees.Select(a => new AttendeeDto(
+                                created.Id,
+                                a.UserId,
+                                a.User.Email,
+                                a.Response
+                            ))
+                            .ToList()
+                    );
+
                     await hub.Clients.All.SendAsync("event:created", dto);
-                    return Results.Created($"/api/events/{dto.Id}", dto);
+                    return Results.Created($"/api/events/{e.Id}", dto);
                 }
             )
             .RequireAuthorization();
 
         // PUT /api/events/{event_id}
-        // g.MapPut(
-        //         "/{event_id}",
-        //         async (
-        //             Guid eventId,
-        //             AppDbContext db,
-        //             IHubContext<CalendarHub> hub,
-        //             CreateEventDto req,
-        //             ClaimsPrincipal user
-        //         ) =>
-        //         {
-        //             var userIdString = user.FindFirstValue(ClaimTypes.NameIdentifier);
-        //             if (string.IsNullOrWhiteSpace(userIdString))
-        //             {
-        //                 Console.WriteLine("userId is null!");
-        //                 return Results.Unauthorized();
-        //             }
-        //
-        //             if (!Guid.TryParse(userIdString, out var userId))
-        //             {
-        //                 Console.WriteLine($"Could not parse user id: {userIdString}");
-        //                 return Results.Unauthorized();
-        //             }
-        //
-        //             var e = await db.Events.FindAsync(eventId);
-        //             if (e is null)
-        //                 return Results.NotFound();
-        //
-        //             if (userId != e.OrganizerId)
-        //                 return Results.Forbid();
-        //
-        //             e.Title = req.Title;
-        //             e.Description = req.Description;
-        //             e.Attendees = req.Attendees;
-        //             e.StartUtc = req.StartUtc;
-        //             e.EndUtc = req.EndUtc;
-        //
-        //             db.Events.Entry(e).State = EntityState.Modified;
-        //
-        //             await db.SaveChangesAsync();
-        //
-        //             var dto = new EventDto(
-        //                 e.Id,
-        //                 e.Title,
-        //                 e.StartUtc,
-        //                 e.EndUtc,
-        //                 e.RoomId,
-        //                 e.Attendees
-        //             );
-        //             await hub.Clients.All.SendAsync("event:created", dto);
-        //             return Results.Created($"/api/events/{e.Id}", dto);
-        //         }
-        //     )
-        //     .RequireAuthorization();
-        //
+        g.MapPut(
+                "/{event_id}",
+                async (
+                    Guid eventId,
+                    AppDbContext db,
+                    IHubContext<CalendarHub> hub,
+                    CreateEventDto req,
+                    ClaimsPrincipal user
+                ) =>
+                {
+                    var userIdString = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (string.IsNullOrWhiteSpace(userIdString))
+                    {
+                        Console.WriteLine("userId is null!");
+                        return Results.Unauthorized();
+                    }
+
+                    if (!Guid.TryParse(userIdString, out var userId))
+                    {
+                        Console.WriteLine($"Could not parse user id: {userIdString}");
+                        return Results.Unauthorized();
+                    }
+
+                    var e = await db.Events.FindAsync(eventId);
+                    if (e is null)
+                        return Results.NotFound();
+
+                    if (userId != e.OrganizerId)
+                        return Results.Forbid();
+
+                    e.Title = req.Title;
+                    e.Description = req.Description;
+                    e.Attendees = req.Attendees;
+                    e.StartUtc = req.StartUtc;
+                    e.EndUtc = req.EndUtc;
+
+                    db.Events.Entry(e).State = EntityState.Modified;
+
+                    await db.SaveChangesAsync();
+
+                    var dto = new EventDto(
+                        e.Id,
+                        e.Title,
+                        e.StartUtc,
+                        e.EndUtc,
+                        e.RoomId,
+                        e.Attendees
+                    );
+                    await hub.Clients.All.SendAsync("event:created", dto);
+                    return Results.Created($"/api/events/{e.Id}", dto);
+                }
+            )
+            .RequireAuthorization();
+
         // TODO : Make this locked for admins only or completely remove this function :)
         // DELETE /api/events
         g.MapDelete(

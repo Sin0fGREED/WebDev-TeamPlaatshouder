@@ -10,7 +10,7 @@ public sealed class CalendarEvent
     public DateTime EndUtc { get; set; }
 
     public Guid OrganizerId { get; set; }
-    public Employee? Organizer { get; set; }
+    public AppUser? Organizer { get; set; }
 
     public Guid? RoomId { get; set; }
     public Room? Room { get; set; }
@@ -18,16 +18,5 @@ public sealed class CalendarEvent
     public string? RecurrenceRule { get; set; } // RFC5545
     public string Visibility { get; set; } = "Public";
 
-    public List<Attendee> Attendees { get; set; } = new();
-}
-
-public sealed class Attendee
-{
-    public Guid EventId { get; set; }
-    public CalendarEvent Event { get; set; } = default!;
-
-    public Guid EmployeeId { get; set; }
-    public Employee Employee { get; set; } = default!;
-
-    public string Response { get; set; } = "Maybe";
+    public ICollection<Attendee> Attendees { get; set; } = new List<Attendee>();
 }

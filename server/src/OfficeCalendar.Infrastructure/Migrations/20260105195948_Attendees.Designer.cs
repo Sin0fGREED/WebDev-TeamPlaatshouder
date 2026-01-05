@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OfficeCalendar.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using OfficeCalendar.Infrastructure.Persistence;
 namespace OfficeCalendar.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260105195948_Attendees")]
+    partial class Attendees
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,10 +60,13 @@ namespace OfficeCalendar.Infrastructure.Migrations
 
             modelBuilder.Entity("OfficeCalendar.Domain.Entities.Attendee", b =>
                 {
-                    b.Property<Guid>("CalendarEventId")
+                    b.Property<Guid>("EventId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CalendarEventId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Response")
@@ -68,7 +74,9 @@ namespace OfficeCalendar.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.HasKey("CalendarEventId", "UserId");
+                    b.HasKey("EventId", "UserId");
+
+                    b.HasIndex("CalendarEventId");
 
                     b.HasIndex("UserId");
 
@@ -136,19 +144,15 @@ namespace OfficeCalendar.Infrastructure.Migrations
 
             modelBuilder.Entity("OfficeCalendar.Domain.Entities.Attendee", b =>
                 {
-                    b.HasOne("OfficeCalendar.Domain.Entities.CalendarEvent", "Event")
+                    b.HasOne("OfficeCalendar.Domain.Entities.CalendarEvent", null)
                         .WithMany("Attendees")
-                        .HasForeignKey("CalendarEventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CalendarEventId");
 
                     b.HasOne("OfficeCalendar.Domain.Entities.AppUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Event");
 
                     b.Navigation("User");
                 });
