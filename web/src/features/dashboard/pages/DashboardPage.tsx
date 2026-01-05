@@ -1,12 +1,12 @@
 import CalendarView from "../../calendar/CalendarView";
 import { useOutletContext } from "react-router-dom";
-type RootOutletCtx = { collapsed: boolean };
 
-export default function DashboardPage() {
-  const { collapsed } = useOutletContext<RootOutletCtx>();
 import { useEvents } from "../../events/api";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+type RootOutletCtx = { collapsed: boolean };
+
 
 function formatNextEventTime(startUtc: string) {
   const d = new Date(startUtc);
@@ -31,6 +31,8 @@ export default function DashboardPage() {
   const from = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const to = new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000).toISOString();
   const { data: events, isLoading, isError, error, refetch } = useEvents(from, to);
+
+  const { collapsed } = useOutletContext<RootOutletCtx>();
 
   useEffect(() => {
     // helps ensure dashboard is fresh after navigation
@@ -98,9 +100,9 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  {e.description ? (
+                  {e.roomId ? (
                     <div className="mt-3 line-clamp-2 text-xs text-gray-500 dark:text-gray-300">
-                      {e.description}
+                      {e.roomId}
                     </div>
                   ) : null}
                 </button>

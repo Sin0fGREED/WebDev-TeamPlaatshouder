@@ -42,6 +42,8 @@ function responseLabel(r?: string) {
   if (v.includes("tent")) return { text: "Tentative", cls: "bg-yellow-500/15 text-yellow-800 dark:text-yellow-200" };
   if (v.includes("maybe")) return { text: "Tentative", cls: "bg-yellow-500/15 text-yellow-800 dark:text-yellow-200" };
   return { text: r ?? "No response", cls: "bg-gray-500/15 text-gray-700 dark:text-gray-200" };
+}
+
 function formatRange(startUtc?: string, endUtc?: string) {
   if (!startUtc || !endUtc) return "";
   const s = new Date(startUtc);
@@ -54,7 +56,6 @@ function formatRange(startUtc?: string, endUtc?: string) {
 
 export default function ViewEventPage() {
   const { event_id } = useParams();
-  const { data: event } = useEvent(event_id!);
 
   const { data: event, isLoading, isError } = useEvent(event_id!);
   const timeRange = useMemo(() => formatRange(event?.startUtc, event?.endUtc), [event?.startUtc, event?.endUtc]);
@@ -165,9 +166,9 @@ export default function ViewEventPage() {
               </div>
             </div>
 
-            {event?.description ? (
+            {event?.roomId ? (
               <div className="mt-4 rounded-xl border border-border/40 bg-muted/40 p-4 text-sm leading-relaxed text-gray-700 dark:text-gray-200">
-                {event.description}
+                {event.roomId}
               </div>
             ) : null}
 
@@ -176,11 +177,10 @@ export default function ViewEventPage() {
                 <div className="mb-3 text-sm font-semibold">Attendees</div>
                 <div className="grid gap-3">
                   {event.attendees.map((a) => (
-                    <div key={a.id} className="rounded-xl border border-border/60 bg-card p-4">
+                    <div key={a.userId} className="rounded-xl border border-border/60 bg-card p-4">
                       <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
-                          <div className="truncate text-sm font-medium">{a.employee.user.email}</div>
-                          <div className="text-xs text-gray-500 dark:text-gray-300">{a.employee.role}</div>
+                          <div className="truncate text-sm font-medium">{a.email}</div>
                         </div>
                         <div className="shrink-0 rounded-full border border-border/60 bg-muted px-3 py-1 text-xs">
                           {a.response}
