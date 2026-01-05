@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCreateEvent } from "./api";
+import { UserDto, useUsersQuery } from "../presence/api";
 
 // Helpers to convert between ISO and <input type="datetime-local">
 function toLocalInputValue(iso?: string | null) {
@@ -21,6 +22,8 @@ function toIsoFromLocalInput(value: string) {
   return new Date(value).toISOString();
 }
 
+
+
 export default function CreateEventPage() {
   const [search] = useSearchParams();
   const navigate = useNavigate();
@@ -36,6 +39,11 @@ export default function CreateEventPage() {
   const [endLocal, setEndLocal] = useState(toLocalInputValue(endQ));
   const [error, setError] = useState<string | null>(null);
 
+  const [attendees, setAttendees] = useState<{ userId: string; email: string; role?: string }[]>([]);
+  const [isAttendeeModalOpen, setIsAttendeeModalOpen] = useState(false);
+  const [userQuery, setUserQuery] = useState("");
+  const { data: users, isLoading: usersLoading } = useUsersQuery(userQuery);
+
   // basic derived validity
   const isValid = useMemo(() => {
     if (!title.trim()) return false;
@@ -48,6 +56,17 @@ export default function CreateEventPage() {
   useEffect(() => {
     setError(null);
   }, [title, startLocal, endLocal]);
+
+  function addAttendee(user: UserDto) {
+    setAttendees((prev) => {
+      if (prev.some((a) => a.userId === user.id)) return prev;
+      return [...prev, { userId: user.id, email: user.email }];
+    });
+  }
+
+  function removeAttendee(userId: string) {
+    setAttendees((prev) => prev.filter((a) => a.userId !== userId));
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -62,6 +81,7 @@ export default function CreateEventPage() {
       startUtc: toIsoFromLocalInput(startLocal),
       endUtc: toIsoFromLocalInput(endLocal),
       roomId: undefined as string | undefined, // wire up when you add rooms
+      attendees: attendees.map(u => ({ userId: u.userId })),
     };
 
     try {
@@ -126,6 +146,50 @@ export default function CreateEventPage() {
             />
           </div>
 
+          <div>
+            <div className="flex items-center justify-between">
+              <label className="block text-sm mb-1">Attendees</label>
+              <button
+                type="button"
+                className="rounded-xl border border-border/60 bg-muted px-3 py-1.5 text-sm hover:bg-gray-200 dark:hover:bg-white/10"
+                onClick={() => setIsAttendeeModalOpen(true)}
+              >
+                + Add users
+              </button>
+            </div>
+
+            {attendees.length === 0 ? (
+              <div className="mt-2 rounded-xl border border-border/60 bg-muted/40 px-3 py-2 text-sm text-gray-500 dark:text-gray-300">
+                No attendees yet. Added users will be invited with status <span className="font-medium">Pending</span>.
+              </div>
+            ) : (
+              <div className="mt-2 space-y-2">
+                {attendees.map((a) => (
+                  <div
+                    key={a.userId}
+                    className="flex items-center justify-between rounded-xl border border-border/60 bg-card px-3 py-2"
+                  >
+                    <div className="min-w-0">
+                      <div className="font-medium truncate">{a.email}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-300">
+                        Pending
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="rounded-lg border border-border/60 px-2 py-1 text-xs hover:bg-gray-200 dark:hover:bg-white/10"
+                      onClick={() => removeAttendee(a.userId)}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+
           {error && (
             <div className="rounded-xl border border-rose-300/50 bg-rose-50 px-3 py-2 text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200">
               {error}
@@ -148,6 +212,91 @@ export default function CreateEventPage() {
             </button>
           </div>
         </form>
+
+        {isAttendeeModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div
+              className="absolute inset-0 bg-black/40"
+              onClick={() => setIsAttendeeModalOpen(false)}
+            />
+
+            <div className="relative w-full max-w-lg rounded-2xl border border-border/60 bg-card p-5 shadow-xl">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="text-lg font-semibold">Add users</div>
+                  <div className="mt-1 text-sm text-gray-500 dark:text-gray-300">
+                    Search users and invite them to the event.
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="rounded-lg border border-border/60 px-2 py-1 text-sm hover:bg-gray-200 dark:hover:bg-white/10"
+                  onClick={() => setIsAttendeeModalOpen(false)}
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="mt-4">
+                <input
+                  value={userQuery}
+                  onChange={(e) => setUserQuery(e.target.value)}
+                  className="w-full rounded-xl border border-border/60 bg-card px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Search by email..."
+                  autoFocus
+                />
+              </div>
+
+              <div className="mt-3 max-h-72 overflow-auto rounded-xl border border-border/60">
+                {usersLoading && (
+                  <div className="p-3 text-sm text-gray-500 dark:text-gray-300">
+                    Loading users…
+                  </div>
+                )}
+
+                {!usersLoading && (users ?? []).length === 0 && (
+                  <div className="p-3 text-sm text-gray-500 dark:text-gray-300">
+                    No users found.
+                  </div>
+                )}
+
+                {!usersLoading && (users ?? []).map((u) => {
+                  const alreadyAdded = attendees.some(a => a.userId === u.id);
+                  return (
+                    <button
+                      key={u.id}
+                      type="button"
+                      disabled={alreadyAdded}
+                      onClick={() => addAttendee(u)}
+                      className="flex w-full items-center justify-between px-3 py-2 text-left hover:bg-gray-100 disabled:opacity-60 dark:hover:bg-white/10"
+                    >
+                      <div className="min-w-0">
+                        <div className="font-medium truncate">{u.email}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-300">
+                          {u.role} • {u.status}
+                        </div>
+                      </div>
+                      <div className="text-sm">
+                        {alreadyAdded ? "Added" : "Add"}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="mt-4 flex justify-end">
+                <button
+                  type="button"
+                  className="rounded-xl border border-border/60 bg-muted px-4 py-2 hover:bg-gray-200 dark:hover:bg-white/10"
+                  onClick={() => setIsAttendeeModalOpen(false)}
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

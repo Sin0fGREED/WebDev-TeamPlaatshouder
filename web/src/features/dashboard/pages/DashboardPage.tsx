@@ -1,48 +1,14 @@
 import CalendarView from "../../calendar/CalendarView";
-import { useEvents } from "../../events/api";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-
-function formatNextEventTime(startUtc: string) {
-  const d = new Date(startUtc);
-  return d.toLocaleString(undefined, {
-    weekday: "short",
-    month: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
+import { useOutletContext } from "react-router-dom";
+type RootOutletCtx = { collapsed: boolean };
 
 export default function DashboardPage() {
-  const navigate = useNavigate();
-  const [now, setNow] = useState(() => new Date());
-
-  useEffect(() => {
-    const id = window.setInterval(() => setNow(new Date()), 30_000);
-    return () => window.clearInterval(id);
-  }, []);
-
-  const from = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
-  const to = new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000).toISOString();
-  const { data: events, isLoading, isError, error, refetch } = useEvents(from, to);
-
-  useEffect(() => {
-    // helps ensure dashboard is fresh after navigation
-    refetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const upcomingEvents = (events ?? [])
-    .filter((e) => new Date(e.startUtc).getTime() >= now.getTime())
-    .sort((a, b) => new Date(a.startUtc).getTime() - new Date(b.startUtc).getTime())
-    .slice(0, 5);
-
+  const { collapsed } = useOutletContext<RootOutletCtx>();
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+    <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
       <section className="card p-6">
         <div className="mb-4 text-lg font-semibold">Monthly Calendar</div>
-        <CalendarView />
+        <CalendarView layoutKey={`sidebar-${collapsed ? "collapsed" : "open"}`} />
       </section>
 
       <aside className="card p-0 lg:sticky lg:top-6 lg:self-start">

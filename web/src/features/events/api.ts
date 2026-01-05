@@ -2,10 +2,31 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api';
 import { UserDto } from '../presence/api';
 
-export type EmployeeDto = { id: string; role: string; userId: string; user: UserDto; }
-export type AttendeeDto = { id: string; eventId: string; event: EventDto; employeeId: string; employee: EmployeeDto; response: string };
-export type EventDto = { id: string; title: string; description?: string | null; startUtc: string; endUtc: string; roomId?: string; attendees: AttendeeDto[] };
+//export type AttendeeResponse = "Pending" | "Accepted" | "Declined" | "Tentative";
+export type AttendeeResponse = 0 | 1 | 2 | 3;
+export type AttendeeDto = {
+  userId: string;
+  email: string;
+  response: AttendeeResponse; // or number temporarily
+};
 
+export type EventDto = {
+  id: string;
+  title: string;
+  startUtc: string;
+  endUtc: string;
+  roomId?: string;
+  attendees: AttendeeDto[];
+};
+
+export type CreateAttendeeDto = { userId: string };
+export type CreateEventDto = {
+  title: string;
+  startUtc: string;
+  endUtc: string;
+  roomId?: string;
+  attendees: CreateAttendeeDto[];
+};
 
 export const useEvents = (from: string, to: string) =>
   useQuery({
@@ -20,11 +41,10 @@ export const useEvents = (from: string, to: string) =>
     retry: 1,
   });
 
-
 export const useCreateEvent = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: Omit<EventDto, 'id'>) => api.post('/api/events', payload).then((r) => r.data),
+    mutationFn: (payload: CreateEventDto) => api.post('/api/events', payload).then((r) => r.data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['events'] }),
   });
 };
