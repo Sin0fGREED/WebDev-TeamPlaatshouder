@@ -1,11 +1,3 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
-
-
 :root {
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -63,6 +55,11 @@ html, body {
   color: var(--text);
 }
 
+/* Let the app layout control sizing; avoid Vite template centering. */
+#root {
+  height: 100%;
+}
+
 /* Utility classes that use semantic tokens so colors follow theme */
 .btn-accent {
   background: var(--accent);
@@ -107,18 +104,22 @@ html, body {
 
 .card.rounded { border-radius: var(--radius-md); box-shadow: var(--shadow-sm); background: white; }
 
-/* Accessibility helpers */
-.access-large-text { font-size: 18px; }
-.access-high-contrast { filter: none; }
-.access-high-contrast :root, .access-high-contrast { --text: #071524; --card: #ffffff; --panel: #f6f7f8; }
+/* Accessibility helpers (classes are applied to <html>) */
+html.access-large-text { font-size: 118%; }
+html.access-high-contrast {
+  --bg: #ffffff;
+  --panel: #ffffff;
+  --card: #ffffff;
+  --text: #000000;
+  --muted: #111827;
+  --accent: #000000;
+}
 .access-reduced-motion *, .access-reduced-motion *::before, .access-reduced-motion *::after { transition: none !important; animation: none !important; }
 
 /* Magnifier accessibility mode: increases base scale slightly and shows a
    floating magnifier indicator to communicate the feature is active. The
    magnifier indicator is purely decorative and uses pointer-events:none. */
-.access-magnifier {
-  font-size: 20px; /* slight increase for better legibility */
-}
+html.access-magnifier { }
 .access-magnifier body, .access-magnifier html { cursor: zoom-in; }
 .access-magnifier::after {
   content: '';
@@ -151,14 +152,12 @@ html, body {
   z-index: 9998;
   box-shadow: 0 6px 18px rgba(2,6,23,0.14);
   border: 2px solid rgba(3,253,252,0.22);
+  /* Live magnification: browser re-renders underlying content. */
+  -webkit-backdrop-filter: blur(0px) saturate(1) brightness(1) contrast(1) zoom(var(--magnifier-zoom, 1.75));
+  backdrop-filter: blur(0px) saturate(1) brightness(1) contrast(1) zoom(var(--magnifier-zoom, 1.75));
+  background: rgba(255,255,255,0.02);
 }
-.magnifier-inner {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100vw;
-  height: 100vh;
-}
+.magnifier-inner { display: none; }
 .magnifier-lens img { display: none; }
 
 /* Nav active/inactive helpers */

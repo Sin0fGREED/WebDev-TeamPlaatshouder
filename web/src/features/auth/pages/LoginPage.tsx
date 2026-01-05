@@ -1,35 +1,158 @@
 import { type FormEvent, useState } from "react";
-import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../app/providers/AuthProvider";
 
+/* =======================
+   Validation Rules
+======================= */
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// NOTE: backend currently seeds a dev-only password ("password").
+// Keep client-side validation permissive to avoid blocking valid credentials.
+const minPasswordLength = 1;
+
+/* =======================
+   Register Modal
+======================= */
+
+type RegisterBoxProps = {
+  email: string;
+  setEmail: (v: string) => void;
+  password: string;
+  setPassword: (v: string) => void;
+  confirmPassword: string;
+  setConfirmPassword: (v: string) => void;
+  error: string | null;
+  onSubmit: (e: FormEvent) => void;
+  onClose: () => void;
+};
+
+function RegisterBox({
+  email,
+  setEmail,
+  password,
+  setPassword,
+  confirmPassword,
+  setConfirmPassword,
+  error,
+  onSubmit,
+  onClose,
+}: RegisterBoxProps) {
+  return (
+    <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-20">
+      <div className="relative w-80 bg-white shadow-md p-6 rounded-lg">
+        <button
+          type="button"
+          className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 font-bold"
+          onClick={onClose}
+        >
+          ✕
+        </button>
+
+        <h2 className="text-xl font-semibold text-center mb-4">Register</h2>
+
+        <form onSubmit={onSubmit} className="flex flex-col gap-3">
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            placeholder="user@email.com"
+            className="border rounded-md px-3 py-2"
+            required
+          />
+
+          <input
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            type="password"
+            placeholder="Password"
+            className="border rounded-md px-3 py-2"
+            required
+          />
+
+          <input
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            type="password"
+            placeholder="Confirm Password"
+            className="border rounded-md px-3 py-2"
+            required
+          />
+
+          <button
+            type="submit"
+            className="mt-3 bg-blue-500 text-black py-2 rounded-md hover:bg-blue-500 transition-colors"
+          >
+            Register
+          </button>
+        </form>
+
+        {error && (
+          <p className="text-sm text-red-600 mt-2 text-center">{error}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* =======================
+   Login Page
+======================= */
+
 export default function LoginPage() {
-  const [loading, setLoading] = useState(false);
+  /* Login */
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+
+  /* Register */
+  const [registerEmail, setRegisterEmail] = useState("");
+  const [registerPassword, setRegisterPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
+
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation() as any;
   const from = location.state?.from?.pathname || "/";
 
-  async function onSubmit(e: FormEvent) {
+  /* ---------- Login ---------- */
+
+  async function handleLogin(e: FormEvent) {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+
+    if (!emailRegex.test(loginEmail)) {
+      setError("Please enter a valid email (user@email.com)");
+      return;
+    }
+
+    if (loginPassword.length < minPasswordLength) {
+      setError("Please enter your password");
+      return;
+    }
+
+    setLoading(true);
     try {
-      // somewhere in your LoginPage submit:
-      const email = "bob@gmail.com";
-      const password = "password";
-      const res = await fetch(
-        `${import.meta.env.VITE_API_BASE}/api/auth/login`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        }
-      );
-      console.log(res);
-      if (!res.ok) throw new Error("Invalid credentials");
+      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: loginEmail,
+          password: loginPassword,
+        }),
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "Invalid credentials");
+      }
+
       const { token } = await res.json();
-      login(token, { email });
+
+      login(token, { email: loginEmail });
       navigate(from, { replace: true });
     } catch (err: any) {
       setError(err.message ?? "Login failed");
@@ -38,27 +161,161 @@ export default function LoginPage() {
     }
   }
 
-  return (
-    <div className="mx-auto max-w-sm">
-      <h1 className="mb-6 text-2xl font-semibold">Login</h1>
-      <form onSubmit={onSubmit} className="space-y-4">
-        {/* Optional: email/password fields if you wire real auth later */}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-500 disabled:opacity-50"
-        >
-          {loading ? "Signing in..." : "Sign in (dev token)"}
-        </button>
-        {error && <p className="text-sm text-red-600">{error}</p>}
-      </form>
+  /* ---------- Dev Token ---------- */
 
-      <p className="mt-4 text-sm text-gray-600">
-        No account?{" "}
-        <Link className="text-blue-600 hover:underline" to="/register">
-          Register
-        </Link>
-      </p>
+  async function handleDevLogin() {
+    setError(null);
+    setLoading(true);
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: "admin@test.com",
+          password: "password",
+        }),
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "Dev login failed");
+      }
+      const { token } = await res.json();
+
+      login(token, { email: "admin@test.com" });
+      navigate(from, { replace: true });
+    } catch (err: any) {
+      setError(err.message ?? "Dev login failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  /* ---------- Register ---------- */
+
+  async function handleRegister(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+
+    if (!emailRegex.test(registerEmail)) {
+      setError("Please enter a valid email (user@email.com)");
+      return;
+    }
+
+    if (!passwordRegex.test(registerPassword)) {
+      setError(
+        "Password must be 8+ chars, include uppercase, number, and special character"
+      );
+      return;
+    }
+
+    if (registerPassword !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: registerEmail,
+          password: registerPassword,
+        }),
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "Registration failed");
+      }
+
+      setShowRegister(false);
+      setLoginEmail(registerEmail);
+      setLoginPassword(registerPassword);
+    } catch (err: any) {
+      setError(err.message ?? "Registration failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="w-screen h-screen flex items-center justify-center relative bg-[url('/blue_background.jpg')] bg-cover bg-center">
+      <div className="z-10">
+        <div className="w-80 bg-white shadow-md p-6 rounded-lg">
+          <h1 className="text-2xl font-semibold text-center mb-4 text-black">Welcome</h1>
+
+          <form onSubmit={handleLogin} className="flex flex-col gap-3">
+            <input
+              value={loginEmail}
+              onChange={(e) => setLoginEmail(e.target.value)}
+              type="email"
+              placeholder="user@email.com"
+              className="border rounded-md px-3 py-2"
+              required
+            />
+
+            <input
+              value={loginPassword}
+              onChange={(e) => setLoginPassword(e.target.value)}
+              type="password"
+              placeholder="Password"
+              className="border rounded-md px-3 py-2"
+              required
+            />
+
+            <button
+              disabled={loading}
+              className="mt-3 bg-blue-500 text-black py-2 rounded-md hover:bg-blue-500 transition-colors disabled:opacity-50"
+            >
+              {loading ? "Signing in..." : "Sign in"}
+            </button>
+          </form>
+
+          <button
+            type="button"
+            disabled={loading}
+            onClick={handleDevLogin}
+            className="mt-3 w-full bg-gray-200 text-black py-2 rounded-md hover:bg-gray-300 transition-colors disabled:opacity-50"
+          >
+            Sign in (Dev Token)
+          </button>
+
+          <p className="text-sm text-gray-600 mt-3 text-center">
+            No account?{" "}
+            <button
+              type="button"
+              className="text-black hover:underline"
+              onClick={() => {
+                setError(null);
+                setShowRegister(true);
+              }}
+            >
+              Register
+            </button>
+          </p>
+
+          {error && (
+            <p className="text-sm text-red-600 mt-2 text-center text-black">{error}</p>
+          )}
+        </div>
+      </div>
+
+      {showRegister && (
+        <RegisterBox
+          email={registerEmail}
+          setEmail={setRegisterEmail}
+          password={registerPassword}
+          setPassword={setRegisterPassword}
+          confirmPassword={confirmPassword}
+          setConfirmPassword={setConfirmPassword}
+          error={error}
+          onSubmit={handleRegister}
+          onClose={() => setShowRegister(false)}
+        />
+      )}
     </div>
   );
 }

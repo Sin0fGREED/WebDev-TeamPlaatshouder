@@ -31,7 +31,14 @@ export type CreateEventDto = {
 export const useEvents = (from: string, to: string) =>
   useQuery({
     queryKey: ['events', from, to],
-    queryFn: async () => (await api.get<EventDto[]>('/api/events', { params: { from, to } })).data,
+    queryFn: async () =>
+      (
+        await api.get<EventDto[]>('/api/events', {
+          params: { from, to },
+          timeout: 10_000,
+        })
+      ).data,
+    retry: 1,
   });
 
 export const useCreateEvent = () => {
@@ -46,3 +53,4 @@ export const useEvent = (id: string) => useQuery({
   queryKey: ['event', id],
   queryFn: async () => (await api.get<EventDto>(`/api/events/${id}`)).data,
 });
+

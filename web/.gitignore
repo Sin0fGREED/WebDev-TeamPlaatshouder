@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Prevent generated outputs from being committed
+src/**/*.js
+src/**/*.d.ts
+*.tsbuildinfo
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
