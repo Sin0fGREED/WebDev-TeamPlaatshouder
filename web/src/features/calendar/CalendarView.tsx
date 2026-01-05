@@ -89,7 +89,7 @@ export default function CalendarView({ layoutKey }: { layoutKey?: string }) {
     end: e.endUtc,
     extendedProps: {
       roomId: e.roomId,
-      attendees: [{ id: '123', name: 'Feyo' }],
+      attendees: e.attendees,
     },
   })), [events]);
 
