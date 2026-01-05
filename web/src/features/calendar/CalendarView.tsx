@@ -3,7 +3,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { useNavigate } from "react-router-dom";
-import { useMemo, useState, useLayoutEffect, useRef } from 'react';
+import { useMemo, useState, useLayoutEffect, useRef, useCallback } from 'react';
 import { useEvents } from '../events/api';
 import { EventContentArg } from '@fullcalendar/core';
 import "./Calendar.css"
@@ -60,12 +60,6 @@ export default function CalendarView() {
     },
   })), [events]);
 
-  /**
-   * Fixed slot height:
-   * - deterministic (no DOM measurement)
-   * - scales only with zoom
-   * - clamp to avoid unusable extremes
-   */
   const slotHeightPx = useMemo(() => {
     const base = 50;     // baseline compactness
     const scaled = Math.round(base * zoom);
@@ -74,12 +68,24 @@ export default function CalendarView() {
 
   useLayoutEffect(() => {
     document.documentElement.style.setProperty('--fc-slot-h', `${slotHeightPx}px`);
+    const api = calRef.current?.getApi();
+    if (!api) return;
 
-    // Ensure FC recomputes geometry after we change CSS variables
+    // Ensure FC recomputes geometry after we change CSS variables with double rAF
     requestAnimationFrame(() => {
-      calRef.current?.getApi().updateSize();
+      requestAnimationFrame(() => {
+        api.updateSize();
+      });
     });
-  }, [slotHeightPx, slotDuration, slotMinTime, slotMaxTime]);
+
+  }, [zoom, slotHeightPx, slotDuration, slotMinTime, slotMaxTime]);
+
+  const zoomTier = zoom <= 0.75 ? 't75' : zoom < 1.5 ? 't100_125' : 't150plus';
+
+  const renderEventContent = useCallback(
+    (eventInfo: EventContentArg) => <CustomEventContent eventInfo={eventInfo} zoom={zoom} />,
+    [zoom]
+  );
 
   return (
     <div className="p-6 w-full">
@@ -116,6 +122,7 @@ export default function CalendarView() {
       </div>
 
       <FullCalendar
+        key={`cal-${zoomTier}-${slotHeightPx}-${slotDuration}-${slotMinTime}-${slotMaxTime}`}
         ref={calRef}
         locale="en-GB"
         timeZone="UTC"
@@ -129,7 +136,7 @@ export default function CalendarView() {
         headerToolbar={{ left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' }}
         events={formattedEvents}
         eventClick={(eca) => navigate(`/events/${eca.event.id}`)}
-        eventContent={(eventInfo) => <CustomEventContent eventInfo={eventInfo} />}
+        eventContent={renderEventContent}
         eventClassNames={() => ['oc-event']}
         selectable
         select={(sel) => navigate(`/events/new?start=${encodeURIComponent(sel.startStr)}&end=${encodeURIComponent(sel.endStr)}`)}
@@ -153,7 +160,7 @@ export default function CalendarView() {
   );
 }
 
-const CustomEventContent = ({ eventInfo }: { eventInfo: EventContentArg }) => {
+const CustomEventContent = ({ eventInfo, zoom }: { eventInfo: EventContentArg; zoom: number }) => {
   const { title } = eventInfo.event;
   const { roomId, attendees = [] } = eventInfo.event.extendedProps as {
     roomId?: string,
@@ -162,23 +169,27 @@ const CustomEventContent = ({ eventInfo }: { eventInfo: EventContentArg }) => {
 
   const fmt = (d?: Date) =>
     d ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC' }) : '';
+  const showTime = zoom >= 1.0;
+  const showAll = zoom >= 1.5;
 
   return (
     <div className="oc-event-inner">
       <div className="oc-title" title={title}>{title}</div>
 
-      <div className="oc-meta" title={`${fmt(eventInfo.event.start!)}${eventInfo.event.end ? ` - ${fmt(eventInfo.event.end!)}` : ''}`}>
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <polyline points="12 6 12 12 16 14"></polyline>
-        </svg>
-        <span className="oc-meta-text">
-          {fmt(eventInfo.event.start!)}
-          {eventInfo.event.end ? ` - ${fmt(eventInfo.event.end!)}` : ''}
-        </span>
-      </div>
+      {showTime && (
+        <div className="oc-meta" title={`${fmt(eventInfo.event.start!)}${eventInfo.event.end ? ` - ${fmt(eventInfo.event.end!)}` : ''}`}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span className="oc-meta-text">
+            {fmt(eventInfo.event.start!)}
+            {eventInfo.event.end ? ` - ${fmt(eventInfo.event.end!)}` : ''}
+          </span>
+        </div>
+      )}
 
-      {roomId && (
+      {showAll && roomId && (
         <div className="oc-meta" title={roomId}>
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
@@ -188,7 +199,7 @@ const CustomEventContent = ({ eventInfo }: { eventInfo: EventContentArg }) => {
         </div>
       )}
 
-      {!!attendees.length && (
+      {showAll && !!attendees.length && (
         <div className="attendees-inline">
           {attendees.slice(0, 3).map((att) => (
             <div key={att.id} className="attendee-badge" title={att.name}>

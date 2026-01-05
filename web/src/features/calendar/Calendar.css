@@ -1,9 +1,96 @@
-/* Keep slot height fixed and deterministic */
+/* Only the actual grid rows */
 .fc .fc-timegrid-slot,
-.fc .fc-timegrid-slot-lane,
+.fc .fc-timegrid-slot-minor,
+.fc .fc-timegrid-slot-lane {
+  height: var(--fc-slot-h) !important;
+  box-sizing: border-box;
+}
+
+/* Do NOT force these to a fixed height; it can desync labels vs slots */
+.fc .fc-timegrid-axis,
+.fc .fc-timegrid-slot-label {
+  height: auto !important;
+}
+
+/* Ensure events never expand slots; clip instead */
+.fc .fc-timegrid-event,
+.fc .fc-timegrid-event .fc-event-main,
+.fc .oc-event .fc-event-main {
+  overflow: hidden !important;
+}
+
+/* IMPORTANT: FullCalendar sometimes uses flex layouts internally; allow clipping */
+.fc .fc-event-main-frame {
+  overflow: hidden; /* was visible; visible can defeat ellipsis/clamp */
+}
+
+/* Your inner container: set as a vertical stack */
+.fc .oc-event-inner {
+  height: 100%;
+  width: 100%;
+  padding: 6px 8px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+/* Title: single-line ellipsis */
+.fc .oc-event-inner .oc-title {
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.1;
+  min-width: 0; /* important for ellipsis inside flex containers */
+}
+
+/* Meta rows: single-line ellipsis */
+.fc .oc-event-inner .oc-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  opacity: 0.9;
+  min-width: 0;
+}
+
+.fc .oc-event-inner .oc-meta .oc-meta-text {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Attendees row: keep compact and never wrap */
+.fc .oc-event-inner .attendees-inline {
+  margin-top: 2px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.fc .oc-event-inner .attendee-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.20);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #fff;
+  flex: 0 0 auto;
+}
+
+
+.fc .fc-timegrid-slot-label,
 .fc .fc-timegrid-axis {
-  height: var(--fc-slot-h);
-  transition: height 180ms ease;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 /* Ensure events never expand slots; clip instead */
