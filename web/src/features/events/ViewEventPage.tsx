@@ -81,7 +81,7 @@ export default function ViewEventPage() {
               {event?.title ?? "Event"}
             </h2>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-300">
-              Event details
+              {event?.id}
             </p>
           </div>
 
@@ -150,49 +150,8 @@ export default function ViewEventPage() {
             </div>
           )}
         </div>
-        {isLoading ? (
-          <div className="text-sm text-gray-500 dark:text-gray-300">Loading…</div>
-        ) : isError ? (
-          <div className="text-sm text-rose-500">Failed to load event.</div>
-        ) : (
-          <div className="rounded-2xl border border-border/60 bg-card/60 p-6 shadow-sm">
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
-                <h2 className="truncate text-2xl font-semibold">{event?.title}</h2>
-                <div className="mt-1 text-sm text-gray-500 dark:text-gray-300">{timeRange}</div>
-              </div>
-              <div className="shrink-0 rounded-full border border-border/60 bg-muted px-3 py-1 text-xs text-gray-600 dark:text-gray-300">
-                Event
-              </div>
-            </div>
 
-            {event?.roomId ? (
-              <div className="mt-4 rounded-xl border border-border/40 bg-muted/40 p-4 text-sm leading-relaxed text-gray-700 dark:text-gray-200">
-                {event.roomId}
-              </div>
-            ) : null}
 
-            {event?.attendees?.length ? (
-              <div className="mt-6">
-                <div className="mb-3 text-sm font-semibold">Attendees</div>
-                <div className="grid gap-3">
-                  {event.attendees.map((a) => (
-                    <div key={a.userId} className="rounded-xl border border-border/60 bg-card p-4">
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="truncate text-sm font-medium">{a.email}</div>
-                        </div>
-                        <div className="shrink-0 rounded-full border border-border/60 bg-muted px-3 py-1 text-xs">
-                          {a.response}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-          </div>
-        )}
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { ThemeToggle } from "../../components/ThemeToggle";
 import Magnifier from "../../components/Magnifier";
 import { useAuth } from "../providers/AuthProvider";
 import { useEffect, useState } from "react";
+import NotificationIcon from "@/components/NotificationIcon";
 
 const navLink =
   ({ isActive }: { isActive: boolean }) =>
@@ -125,7 +126,6 @@ export default function RootLayout() {
                 </NavLink>
                 <ThemeToggle />
                 <NotificationIcon />
-                <HamburgerMenu />
               </div>
             </div>
           </div>
