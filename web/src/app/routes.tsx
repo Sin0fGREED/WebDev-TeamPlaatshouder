@@ -1,31 +1,29 @@
 import { createBrowserRouter } from "react-router-dom";
 import RootLayout from "./layout/RootLayout";
-import RequireAuth from "./providers/RequireAuth";
-
+import DashboardPage from "../features/dashboard/pages/DashboardPage"
+import PresencePage from "../features/presence/PresencePage";
+import CreateEventPage from "../features/events/CreateEventsPage";
+import AccountSettings from "../features/account/AccountSettings";
 import LoginPage from "../features/auth/pages/LoginPage";
-import RegisterPage from "../features/auth/pages/RegisterPage";
-import DashboardPage from "../features/dashboard/pages/DashboardPage";
-import CalendarView from "../features/calendar/CalendarView";
-
-// When ready, you can point these to your existing feature pages:
-// import CalendarPage from "@/features/events/pages/CalendarPage";
-// import TeamPresencePage from "@/features/presence/pages/TeamPresencePage";
-
-function Placeholder({ title }: { title: string }) {
-  return <div><h1 className="text-xl font-semibold">{title}</h1></div>;
-}
-
-const TeamPresencePage = () => <Placeholder title="Team Presence" />;
+import RequireAuth from "./providers/RequireAuth";
+import CalendarPage from "../features/calendar/CalendarPage";
+import ViewEventPage from "../features/events/ViewEventPage";
+import NotificationsPage from "../features/notifications/NotificationsPage";
 
 export const router = createBrowserRouter([
+  { path: "/login", element: <LoginPage /> },
   {
-    element: <RootLayout />,
+    element: <RequireAuth><RootLayout /></RequireAuth>, // gate everything below
     children: [
-      { path: "/", element: <RequireAuth><DashboardPage /></RequireAuth> },
-      { path: "/calendar", element: <RequireAuth><CalendarView /></RequireAuth> },
-      { path: "/presence", element: <RequireAuth><TeamPresencePage /></RequireAuth> },
+
+      { path: "/", element: <DashboardPage /> },
+      { path: "/dashboard", element: <DashboardPage /> },
+      { path: "/calendar", element: <CalendarPage /> },
+      { path: "/presence", element: <PresencePage /> },
+      { path: "/events/new", element: <CreateEventPage /> },
+      { path: "/events/:event_id", element: <ViewEventPage /> },
+      { path: "/notifications", element: <NotificationsPage /> },
+      { path: "/account", element: <AccountSettings /> }
     ],
   },
-  { path: "/login", element: <LoginPage /> },
-  { path: "/register", element: <RegisterPage /> },
 ]);

@@ -8,9 +8,7 @@
     "moduleResolution": "Bundler",
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "src/*"
-      ]
+      "@/*": ["src/*"]
     },
     "strict": true,
     "skipLibCheck": true,
@@ -18,11 +16,7 @@
     "useDefineForClassFields": true,
     "noFallthroughCasesInSwitch": true,
     "resolveJsonModule": true,
-    "types": [
-      "vite/client"
-    ]
+    "types": ["vite/client"]
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }

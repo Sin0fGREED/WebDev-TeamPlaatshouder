@@ -11,6 +11,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<CalendarEvent> Events => Set<CalendarEvent>();
     public DbSet<Attendee> Attendees => Set<Attendee>();
     public DbSet<OfficeDay> OfficeDays => Set<OfficeDay>();
+    public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<NotificationDismissal> NotificationDismissals => Set<NotificationDismissal>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -18,12 +20,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         // Attendee composite key
         b.Entity<Attendee>()
-            .HasKey(a => new { a.CalendarEventId, a.EmployeeId });
+            .HasKey(a => new { a.EventId, a.EmployeeId });
 
         b.Entity<Attendee>()
             .HasOne(a => a.Event)
             .WithMany(e => e.Attendees)
-            .HasForeignKey(a => a.CalendarEventId);
+            .HasForeignKey(a => a.EventId);
 
         b.Entity<Attendee>()
             .HasOne(a => a.Employee)
@@ -55,6 +57,26 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         b.Entity<AppUser>()
             .HasIndex(u => u.Email)
             .IsUnique();
+
+        // Notifications
+        b.Entity<Notification>()
+            .HasKey(n => n.Id);
+
+        b.Entity<Notification>()
+            .HasIndex(n => n.RecipientId);
+
+        b.Entity<Notification>()
+            .Property(n => n.Message)
+            .IsRequired();
+
+        b.Entity<NotificationDismissal>()
+            .HasKey(nd => new { nd.NotificationId, nd.UserId });
+
+        b.Entity<NotificationDismissal>()
+            .HasOne(nd => nd.Notification)
+            .WithMany()
+            .HasForeignKey(nd => nd.NotificationId)
+            .OnDelete(DeleteBehavior.Cascade);
 
     }
 }

@@ -35,7 +35,15 @@ namespace OfficeCalendar.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -49,7 +57,7 @@ namespace OfficeCalendar.Infrastructure.Migrations
 
             modelBuilder.Entity("OfficeCalendar.Domain.Entities.Attendee", b =>
                 {
-                    b.Property<Guid>("CalendarEventId")
+                    b.Property<Guid>("EventId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("EmployeeId")
@@ -59,7 +67,7 @@ namespace OfficeCalendar.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("CalendarEventId", "EmployeeId");
+                    b.HasKey("EventId", "EmployeeId");
 
                     b.HasIndex("EmployeeId");
 
@@ -113,28 +121,74 @@ namespace OfficeCalendar.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("Employees");
+                });
+
+            modelBuilder.Entity("OfficeCalendar.Domain.Entities.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ActorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ActorName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("EventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("RecipientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RecipientId");
+
+                    b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("OfficeCalendar.Domain.Entities.NotificationDismissal", b =>
+                {
+                    b.Property<Guid>("NotificationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DismissedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.HasKey("NotificationId", "UserId");
+
+                    b.ToTable("NotificationDismissals");
                 });
 
             modelBuilder.Entity("OfficeCalendar.Domain.Entities.OfficeDay", b =>
@@ -175,15 +229,15 @@ namespace OfficeCalendar.Infrastructure.Migrations
 
             modelBuilder.Entity("OfficeCalendar.Domain.Entities.Attendee", b =>
                 {
-                    b.HasOne("OfficeCalendar.Domain.Entities.CalendarEvent", "Event")
-                        .WithMany("Attendees")
-                        .HasForeignKey("CalendarEventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("OfficeCalendar.Domain.Entities.Employee", "Employee")
                         .WithMany("Attending")
                         .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OfficeCalendar.Domain.Entities.CalendarEvent", "Event")
+                        .WithMany("Attendees")
+                        .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -210,6 +264,28 @@ namespace OfficeCalendar.Infrastructure.Migrations
                     b.Navigation("Room");
                 });
 
+            modelBuilder.Entity("OfficeCalendar.Domain.Entities.Employee", b =>
+                {
+                    b.HasOne("OfficeCalendar.Domain.Entities.AppUser", "User")
+                        .WithMany("Employments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("OfficeCalendar.Domain.Entities.NotificationDismissal", b =>
+                {
+                    b.HasOne("OfficeCalendar.Domain.Entities.Notification", "Notification")
+                        .WithMany()
+                        .HasForeignKey("NotificationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Notification");
+                });
+
             modelBuilder.Entity("OfficeCalendar.Domain.Entities.OfficeDay", b =>
                 {
                     b.HasOne("OfficeCalendar.Domain.Entities.Employee", "Employee")
@@ -219,6 +295,11 @@ namespace OfficeCalendar.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Employee");
+                });
+
+            modelBuilder.Entity("OfficeCalendar.Domain.Entities.AppUser", b =>
+                {
+                    b.Navigation("Employments");
                 });
 
             modelBuilder.Entity("OfficeCalendar.Domain.Entities.CalendarEvent", b =>
