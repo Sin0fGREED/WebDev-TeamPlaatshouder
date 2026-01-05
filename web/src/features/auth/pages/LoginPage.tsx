@@ -170,15 +170,15 @@ export default function LoginPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: "dev@company.com",
-          password: "DevPassword1!",
+          email: "admin@test.com",
+          password: "password",
         }),
       });
 
       if (!res.ok) throw new Error("Dev login failed");
       const { token } = await res.json();
 
-      login(token, { email: "dev@company.com" });
+      login(token, { email: "admin@test.com" });
       navigate(from, { replace: true });
     } catch (err: any) {
       setError(err.message ?? "Dev login failed");
