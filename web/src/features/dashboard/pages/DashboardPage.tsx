@@ -1,11 +1,14 @@
 import CalendarView from "../../calendar/CalendarView";
+import { useOutletContext } from "react-router-dom";
+type RootOutletCtx = { collapsed: boolean };
 
 export default function DashboardPage() {
+  const { collapsed } = useOutletContext<RootOutletCtx>();
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
       <section className="card p-6">
         <div className="mb-4 text-lg font-semibold">Monthly Calendar</div>
-        <CalendarView />
+        <CalendarView layoutKey={`sidebar-${collapsed ? "collapsed" : "open"}`} />
       </section>
 
       <aside className="card p-6">

@@ -3,13 +3,46 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { useNavigate } from "react-router-dom";
-import { useMemo, useState, useLayoutEffect, useRef, useCallback } from 'react';
+import { useMemo, useState, useLayoutEffect, useRef, useCallback, useEffect } from 'react';
 import { useEvents } from '../events/api';
 import { EventContentArg } from '@fullcalendar/core';
 import "./Calendar.css"
 
-export default function CalendarView() {
+export default function CalendarView({ layoutKey }: { layoutKey?: string }) {
   const calRef = useRef<FullCalendar | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // This observes the sidebar and only updates the calendar when 
+  // animation from open-close or close-open finishes
+  // This makes it so calendar correctly re-renders when size is correct
+  useEffect(() => {
+    const el = containerRef.current;
+    const api = calRef.current?.getApi();
+    if (!el || !api) return;
+
+    let raf1: number | null = null;
+    let raf2: number | null = null;
+
+    const ro = new ResizeObserver(() => {
+      // double rAF ensures layout settled for this frame
+      if (raf1) cancelAnimationFrame(raf1);
+      if (raf2) cancelAnimationFrame(raf2);
+
+      raf1 = requestAnimationFrame(() => {
+        raf2 = requestAnimationFrame(() => {
+          api.updateSize();
+        });
+      });
+    });
+
+    ro.observe(el);
+
+    return () => {
+      ro.disconnect();
+      if (raf1) cancelAnimationFrame(raf1);
+      if (raf2) cancelAnimationFrame(raf2);
+    };
+  }, []);
 
   const [range, setRange] = useState({
     from: new Date().toISOString(),
@@ -23,7 +56,7 @@ export default function CalendarView() {
   const [slotDuration, setSlotDuration] =
     useState<'00:15:00' | '00:30:00' | '01:00:00'>('01:00:00');
 
-  // derive min/max hours from events currently in view
+  // Derive min/max hours from events currently in view
   const { slotMinTime, slotMaxTime } = useMemo(() => {
     const baseMin = 7;
     const baseMax = 20;
@@ -78,13 +111,13 @@ export default function CalendarView() {
       });
     });
 
-  }, [zoom, slotHeightPx, slotDuration, slotMinTime, slotMaxTime]);
+  }, [layoutKey, zoom, slotHeightPx, slotDuration, slotMinTime, slotMaxTime]);
 
   const zoomTier = zoom <= 0.75 ? 't75' : zoom < 1.5 ? 't100_125' : 't150plus';
 
   const renderEventContent = useCallback(
     (eventInfo: EventContentArg) => <CustomEventContent eventInfo={eventInfo} zoom={zoom} />,
-    [zoom]
+    [layoutKey, zoom]
   );
 
   return (
@@ -120,42 +153,43 @@ export default function CalendarView() {
           </div>
         </div>
       </div>
+      <div ref={containerRef} className="w-full">
+        <FullCalendar
+          key={`fc-${zoomTier}-${slotHeightPx}-${slotDuration}-${slotMinTime}-${slotMaxTime}`}
+          ref={calRef}
+          locale="en-GB"
+          timeZone="UTC"
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          views={{
+            timeGridWeek: {
+              titleFormat: { day: 'numeric', month: 'short', year: 'numeric' },
+            },
+          }}
+          initialView="timeGridWeek"
+          headerToolbar={{ left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' }}
+          events={formattedEvents}
+          eventClick={(eca) => navigate(`/events/${eca.event.id}`)}
+          eventContent={renderEventContent}
+          eventClassNames={() => ['oc-event']}
+          selectable
+          select={(sel) => navigate(`/events/new?start=${encodeURIComponent(sel.startStr)}&end=${encodeURIComponent(sel.endStr)}`)}
+          datesSet={(arg) => setRange({ from: arg.startStr, to: arg.endStr })}
+          height="auto"
 
-      <FullCalendar
-        key={`cal-${zoomTier}-${slotHeightPx}-${slotDuration}-${slotMinTime}-${slotMaxTime}`}
-        ref={calRef}
-        locale="en-GB"
-        timeZone="UTC"
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        views={{
-          timeGridWeek: {
-            titleFormat: { day: 'numeric', month: 'short', year: 'numeric' },
-          },
-        }}
-        initialView="timeGridWeek"
-        headerToolbar={{ left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' }}
-        events={formattedEvents}
-        eventClick={(eca) => navigate(`/events/${eca.event.id}`)}
-        eventContent={renderEventContent}
-        eventClassNames={() => ['oc-event']}
-        selectable
-        select={(sel) => navigate(`/events/new?start=${encodeURIComponent(sel.startStr)}&end=${encodeURIComponent(sel.endStr)}`)}
-        datesSet={(arg) => setRange({ from: arg.startStr, to: arg.endStr })}
-        height="auto"
+          slotLabelFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
 
-        slotLabelFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
+          slotMinTime={slotMinTime}
+          slotMaxTime={slotMaxTime}
+          scrollTime="08:00:00"
 
-        slotMinTime={slotMinTime}
-        slotMaxTime={slotMaxTime}
-        scrollTime="08:00:00"
+          slotDuration={slotDuration}
+          slotLabelInterval={slotDuration}
 
-        slotDuration={slotDuration}
-        slotLabelInterval={slotDuration}
-
-        eventOverlap={true}
-        dayMaxEventRows={false}
-        nowIndicator
-      />
+          eventOverlap={true}
+          dayMaxEventRows={false}
+          nowIndicator
+        />
+      </div>
     </div>
   );
 }

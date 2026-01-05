@@ -135,7 +135,7 @@ export default function RootLayout() {
 
           {/* Routed content */}
           <div className="mx-auto max-w-screen-2xl px-4 py-6">
-            <Outlet />
+            <Outlet context={{ collapsed }} />
           </div>
         </main>
       </div>
