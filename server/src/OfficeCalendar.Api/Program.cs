@@ -77,6 +77,9 @@ app.MapGroup("/api/auth")
 app.MapGroup("/api/users")
   .MapUsersApi();
 
+app.MapGroup("/api/notifications")
+    .MapNotificationsApi();
+
 if (app.Environment.IsDevelopment())
 // Configure the HTTP request pipeline.
 {
