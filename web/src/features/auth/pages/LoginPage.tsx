@@ -16,8 +16,6 @@ const passwordRegex =
 ======================= */
 
 type RegisterBoxProps = {
-  employeeId: string;
-  setEmployeeId: (v: string) => void;
   email: string;
   setEmail: (v: string) => void;
   password: string;
@@ -30,8 +28,6 @@ type RegisterBoxProps = {
 };
 
 function RegisterBox({
-  employeeId,
-  setEmployeeId,
   email,
   setEmail,
   password,
@@ -56,14 +52,6 @@ function RegisterBox({
         <h2 className="text-xl font-semibold text-center mb-4">Register</h2>
 
         <form onSubmit={onSubmit} className="flex flex-col gap-3">
-          <input
-            value={employeeId}
-            onChange={(e) => setEmployeeId(e.target.value)}
-            placeholder="Employee ID"
-            className="border rounded-md px-3 py-2"
-            required
-          />
-
           <input
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -117,7 +105,6 @@ export default function LoginPage() {
   const [loginPassword, setLoginPassword] = useState("");
 
   /* Register */
-  const [employeeId, setEmployeeId] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -206,11 +193,6 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
 
-    if (!employeeId.trim()) {
-      setError("Employee ID is required");
-      return;
-    }
-
     if (!emailRegex.test(registerEmail)) {
       setError("Please enter a valid email (user@email.com)");
       return;
@@ -257,7 +239,6 @@ export default function LoginPage() {
               required
             />
 
-            {/* Primary Sign In */}
             <button
               disabled={loading}
               className="mt-3 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-500 transition-colors disabled:opacity-50"
@@ -266,7 +247,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Dev Token Button */}
           <button
             type="button"
             disabled={loading}
@@ -298,8 +278,6 @@ export default function LoginPage() {
 
       {showRegister && (
         <RegisterBox
-          employeeId={employeeId}
-          setEmployeeId={setEmployeeId}
           email={registerEmail}
           setEmail={setRegisterEmail}
           password={registerPassword}
