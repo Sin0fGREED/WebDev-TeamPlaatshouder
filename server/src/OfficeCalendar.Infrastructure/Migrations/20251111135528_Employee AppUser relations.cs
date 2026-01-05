@@ -31,8 +31,9 @@ namespace OfficeCalendar.Infrastructure.Migrations
                 name: "UserId",
                 table: "Employees",
                 type: "uniqueidentifier",
-                nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
+                nullable: true);
+
+            migrationBuilder.Sql("UPDATE Employees SET UserId = NULL WHERE UserId NOT IN (SELECT Id FROM Users)");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Employees_UserId",

@@ -8,6 +8,7 @@ import LoginPage from "../features/auth/pages/LoginPage";
 import RequireAuth from "./providers/RequireAuth";
 import CalendarPage from "../features/calendar/CalendarPage";
 import ViewEventPage from "../features/events/ViewEventPage";
+import NotificationsPage from "../features/notifications/NotificationsPage";
 
 export const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
@@ -21,7 +22,8 @@ export const router = createBrowserRouter([
       { path: "/presence", element: <PresencePage /> },
       { path: "/events/new", element: <CreateEventPage /> },
       { path: "/events/:event_id", element: <ViewEventPage /> },
-      { path: "/account", element: <div className="card p-6">Account Settings</div> }
+      { path: "/notifications", element: <NotificationsPage /> },
+      { path: "/account", element: <AccountSettings /> }
     ],
   },
 ]);

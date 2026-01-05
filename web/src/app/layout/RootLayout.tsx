@@ -124,6 +124,8 @@ export default function RootLayout() {
                   <Plus className="h-4 w-4" /> New Event
                 </NavLink>
                 <ThemeToggle />
+                <NotificationIcon />
+                <HamburgerMenu />
               </div>
             </div>
           </div>

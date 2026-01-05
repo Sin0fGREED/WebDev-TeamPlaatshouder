@@ -9,6 +9,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Room> Rooms => Set<Room>();
     public DbSet<CalendarEvent> Events => Set<CalendarEvent>();
     public DbSet<Attendee> Attendees => Set<Attendee>();
+    public DbSet<OfficeDay> OfficeDays => Set<OfficeDay>();
+    public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<NotificationDismissal> NotificationDismissals => Set<NotificationDismissal>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -39,5 +42,29 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         // Unique constraint on Email
         b.Entity<AppUser>().HasIndex(u => u.Email).IsUnique();
+        b.Entity<AppUser>()
+            .HasIndex(u => u.Email)
+            .IsUnique();
+
+        // Notifications
+        b.Entity<Notification>()
+            .HasKey(n => n.Id);
+
+        b.Entity<Notification>()
+            .HasIndex(n => n.RecipientId);
+
+        b.Entity<Notification>()
+            .Property(n => n.Message)
+            .IsRequired();
+
+        b.Entity<NotificationDismissal>()
+            .HasKey(nd => new { nd.NotificationId, nd.UserId });
+
+        b.Entity<NotificationDismissal>()
+            .HasOne(nd => nd.Notification)
+            .WithMany()
+            .HasForeignKey(nd => nd.NotificationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
     }
 }
