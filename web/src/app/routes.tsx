@@ -23,7 +23,7 @@ export const router = createBrowserRouter([
       { path: "/events/new", element: <CreateEventPage /> },
       { path: "/events/:event_id", element: <ViewEventPage /> },
       { path: "/notifications", element: <NotificationsPage /> },
-      { path: "/account", element: <div className="card p-6">Account Settings</div> }
+      { path: "/account", element: <AccountSettings /> }
     ],
   },
 ]);
