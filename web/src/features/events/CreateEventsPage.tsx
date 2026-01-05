@@ -62,6 +62,7 @@ export default function CreateEventPage() {
       startUtc: toIsoFromLocalInput(startLocal),
       endUtc: toIsoFromLocalInput(endLocal),
       roomId: undefined as string | undefined, // wire up when you add rooms
+      attendees: []
     };
 
     try {
