@@ -4,7 +4,6 @@ import { ThemeToggle } from "../../components/ThemeToggle";
 import Magnifier from "../../components/Magnifier";
 import { useAuth } from "../providers/AuthProvider";
 import { useEffect, useState } from "react";
-import HamburgerMenu from "@/components/HamburgerMenu";
 
 const navLink =
   ({ isActive }: { isActive: boolean }) =>
@@ -124,7 +123,7 @@ export default function RootLayout() {
                 >
                   <Plus className="h-4 w-4" /> New Event
                 </NavLink>
-                <HamburgerMenu />
+                <ThemeToggle />
               </div>
             </div>
           </div>
