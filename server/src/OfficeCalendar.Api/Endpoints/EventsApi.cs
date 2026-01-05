@@ -45,21 +45,17 @@ public static class EventsApi
             var userIdString = user.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrWhiteSpace(userIdString))
             {
-                Console.WriteLine("userId is null!");
                 return Results.Unauthorized();
             }
 
             if (!Guid.TryParse(userIdString, out var userId))
             {
-                Console.WriteLine($"Could not parse user id: {userIdString}");
                 return Results.Unauthorized();
             }
             var organizerId = await db.Employees
            .Where(e => e.UserId == userId)
            .Select(e => e.Id)
            .FirstOrDefaultAsync();
-
-            Console.WriteLine($"{userIdString}: {userId} : {organizerId}");
 
             if (organizerId == Guid.Empty)
             {
@@ -79,20 +75,11 @@ public static class EventsApi
             db.Events.Add(e);
             await db.SaveChangesAsync();
 
-            var dto = new EventDto(e.Id, e.Title, e.StartUtc, e.EndUtc, e.RoomId, e.Attendees);
-
-            var actorName = user.FindFirstValue(System.Security.Claims.ClaimTypes.Email)
-                            ?? user.FindFirstValue("email")
-                            ?? user.FindFirstValue(System.Security.Claims.ClaimTypes.Name)
-                            ?? user.FindFirstValue("name")
-                            ?? user.Identity?.Name
-                            ?? "Someone";
-            if (Guid.TryParse(actorName ?? string.Empty, out _))
-            {
-                actorName = user.FindFirstValue(System.Security.Claims.ClaimTypes.Email)
-                          ?? user.FindFirstValue("email")
-                          ?? "Someone";
-            }
+            // Create + broadcast notification
+            var actorName = user.FindFirstValue(ClaimTypes.Email)
+                            ?? user.FindFirstValue(ClaimTypes.Name)
+                            ?? user.Identity?.Name;
+            actorName ??= "Unknown";
 
             var notif = new NotificationDto(
                 Guid.NewGuid(),
@@ -105,7 +92,6 @@ public static class EventsApi
                 false
             );
 
-            // persist + broadcast
             db.Notifications.Add(new OfficeCalendar.Domain.Entities.Notification
             {
                 Id = notif.Id,
@@ -118,8 +104,10 @@ public static class EventsApi
                 Timestamp = notif.Timestamp
             });
             await db.SaveChangesAsync();
+
             await hub.Clients.All.SendAsync("notification:created", notif);
 
+            var dto = new EventDto(e.Id, e.Title, e.StartUtc, e.EndUtc, e.RoomId, e.Attendees);
             await hub.Clients.All.SendAsync("event:created", dto);
             return Results.Created($"/api/events/{e.Id}", dto);
         }).RequireAuthorization();
@@ -131,13 +119,11 @@ public static class EventsApi
             var userIdString = user.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrWhiteSpace(userIdString))
             {
-                Console.WriteLine("userId is null!");
                 return Results.Unauthorized();
             }
 
             if (!Guid.TryParse(userIdString, out var userId))
-            { 
-                Console.WriteLine($"Could not parse user id: {userIdString}");
+            {
                 return Results.Unauthorized();
             }
 
@@ -158,27 +144,17 @@ public static class EventsApi
 
             await db.SaveChangesAsync();
 
-            var dto = new EventDto(e.Id, e.Title, e.StartUtc, e.EndUtc, e.RoomId, e.Attendees);
+            var actorName = user.FindFirstValue(ClaimTypes.Email)
+                            ?? user.FindFirstValue(ClaimTypes.Name)
+                            ?? user.Identity?.Name;
+            actorName ??= "Unknown";
 
-            var actorName2 = user.FindFirstValue(System.Security.Claims.ClaimTypes.Email)
-                             ?? user.FindFirstValue("email")
-                             ?? user.FindFirstValue(System.Security.Claims.ClaimTypes.Name)
-                             ?? user.FindFirstValue("name")
-                             ?? user.Identity?.Name
-                             ?? "Someone";
-            if (Guid.TryParse(actorName2 ?? string.Empty, out _))
-            {
-                actorName2 = user.FindFirstValue(System.Security.Claims.ClaimTypes.Email)
-                           ?? user.FindFirstValue("email")
-                           ?? "Someone";
-            }
-
-            var notif2 = new NotificationDto(
+            var notif = new NotificationDto(
                 Guid.NewGuid(),
                 userId,
-                actorName2,
+                actorName,
                 "EventUpdated",
-                $"{actorName2} updated event '{e.Title}'",
+                $"{actorName} updated event '{e.Title}'",
                 e.Id,
                 DateTime.UtcNow,
                 false
@@ -186,20 +162,22 @@ public static class EventsApi
 
             db.Notifications.Add(new OfficeCalendar.Domain.Entities.Notification
             {
-                Id = notif2.Id,
-                ActorId = notif2.ActorId,
-                ActorName = notif2.ActorName,
+                Id = notif.Id,
+                ActorId = notif.ActorId,
+                ActorName = notif.ActorName,
                 RecipientId = null,
-                Action = notif2.Action,
-                Message = notif2.Message,
-                EventId = notif2.EventId,
-                Timestamp = notif2.Timestamp
+                Action = notif.Action,
+                Message = notif.Message,
+                EventId = notif.EventId,
+                Timestamp = notif.Timestamp
             });
             await db.SaveChangesAsync();
-            await hub.Clients.All.SendAsync("notification:created", notif2);
 
-            await hub.Clients.All.SendAsync("event:created", dto);
-            return Results.Created($"/api/events/{e.Id}", dto);
+            await hub.Clients.All.SendAsync("notification:created", notif);
+
+            var dto = new EventDto(e.Id, e.Title, e.StartUtc, e.EndUtc, e.RoomId, e.Attendees);
+            await hub.Clients.All.SendAsync("event:updated", dto);
+            return Results.Ok(dto);
 
         }).RequireAuthorization();
 

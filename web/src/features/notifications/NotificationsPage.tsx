@@ -30,7 +30,6 @@ export default function NotificationsPage() {
         if (Array.isArray(json)) setItems(json);
       }
     } catch {
-      // ignore
     }
   }
 
@@ -42,11 +41,9 @@ export default function NotificationsPage() {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
       if (res.ok || res.status === 204) {
-        // mark read locally rather than removing so this page still shows all notifications
         setItems(i => i.map(it => it.id === id ? { ...it, isRead: true } : it));
       }
     } catch {
-      // ignore
     }
   }
 
