@@ -4,7 +4,6 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-
 using OfficeCalendar.Application.DTOs;
 using OfficeCalendar.Domain.Entities;
 using OfficeCalendar.Infrastructure.Persistence;
@@ -16,34 +15,55 @@ public static class AuthApi
     public static RouteGroupBuilder MapAuthApi(this RouteGroupBuilder g)
     {
         // POST /api/auth/register
-        g.MapPost("/register", async (AppDbContext db, IPasswordHasher<AppUser> hasher, RegisterDto dto) =>
-        {
-            var email = dto.Email.Trim();
-            var exists = await db.Users.AnyAsync(u => u.Email == email);
-            if (exists) return Results.Conflict("Email already registered.");
+        g.MapPost(
+            "/register",
+            async (AppDbContext db, IPasswordHasher<AppUser> hasher, RegisterDto dto) =>
+            {
+                var email = dto.Email.Trim();
+                var exists = await db.Users.AnyAsync(u => u.Email == email);
+                if (exists)
+                    return Results.Conflict("Email already registered.");
 
-            var user = new AppUser { Email = email, IsActive = true };
-            user.PasswordHash = hasher.HashPassword(user, dto.Password);
+                var user = new AppUser { Email = email, IsActive = true };
+                user.PasswordHash = hasher.HashPassword(user, dto.Password);
 
-            db.Users.Add(user);
-            await db.SaveChangesAsync();
+                db.Users.Add(user);
+                await db.SaveChangesAsync();
 
-            return Results.Created($"/api/users/{user.Id}", new { user.Id, user.Email });
-        });
+                return Results.Created($"/api/users/{user.Id}", new { user.Id, user.Email });
+            }
+        );
 
         // POST /api/auth/login
-        g.MapPost("/login", async (AppDbContext db, IPasswordHasher<AppUser> hasher, IConfiguration cfg, LoginDto dto) =>
-        {
-            var email = dto.Email.Trim();
-            var user = await db.Users.SingleOrDefaultAsync(u => u.Email == email && u.IsActive);
-            if (user is null) return Results.Unauthorized();
+        g.MapPost(
+            "/login",
+            async (
+                AppDbContext db,
+                IPasswordHasher<AppUser> hasher,
+                IConfiguration cfg,
+                LoginDto dto
+            ) =>
+            {
+                var email = dto.Email.Trim();
+                var user = await db.Users.SingleOrDefaultAsync(u => u.Email == email && u.IsActive);
+                if (user is null)
+                    return Results.Unauthorized();
 
-            var result = hasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
-            if (result == PasswordVerificationResult.Failed) return Results.Unauthorized();
+                var result = hasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
+                if (result == PasswordVerificationResult.Failed)
+                    return Results.Unauthorized();
 
-            var token = CreateJwt(user, cfg);
-            return Results.Ok(new { token, tokenType = "Bearer", expiresIn = 3600 });
-        });
+                var token = CreateJwt(user, cfg);
+                return Results.Ok(
+                    new
+                    {
+                        token,
+                        tokenType = "Bearer",
+                        expiresIn = 3600,
+                    }
+                );
+            }
+        );
 
         return g;
     }
