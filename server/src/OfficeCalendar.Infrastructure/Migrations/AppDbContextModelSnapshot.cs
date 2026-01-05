@@ -116,26 +116,6 @@ namespace OfficeCalendar.Infrastructure.Migrations
                     b.ToTable("Events");
                 });
 
-            modelBuilder.Entity("OfficeCalendar.Domain.Entities.Employee", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Employees");
-                });
-
             modelBuilder.Entity("OfficeCalendar.Domain.Entities.Notification", b =>
                 {
                     b.Property<Guid>("Id")
@@ -190,24 +170,6 @@ namespace OfficeCalendar.Infrastructure.Migrations
                     b.HasKey("NotificationId", "UserId");
 
                     b.ToTable("NotificationDismissals");
-                });
-
-            modelBuilder.Entity("OfficeCalendar.Domain.Entities.OfficeDay", b =>
-                {
-                    b.Property<Guid>("EmployeeId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.HasKey("EmployeeId", "Date");
-
-                    b.ToTable("OfficeDays");
                 });
 
             modelBuilder.Entity("OfficeCalendar.Domain.Entities.Room", b =>
@@ -265,17 +227,6 @@ namespace OfficeCalendar.Infrastructure.Migrations
                     b.Navigation("Room");
                 });
 
-            modelBuilder.Entity("OfficeCalendar.Domain.Entities.Employee", b =>
-                {
-                    b.HasOne("OfficeCalendar.Domain.Entities.AppUser", "User")
-                        .WithMany("Employments")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("OfficeCalendar.Domain.Entities.NotificationDismissal", b =>
                 {
                     b.HasOne("OfficeCalendar.Domain.Entities.Notification", "Notification")
@@ -285,17 +236,6 @@ namespace OfficeCalendar.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Notification");
-                });
-
-            modelBuilder.Entity("OfficeCalendar.Domain.Entities.OfficeDay", b =>
-                {
-                    b.HasOne("OfficeCalendar.Domain.Entities.Employee", "Employee")
-                        .WithMany()
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Employee");
                 });
 
             modelBuilder.Entity("OfficeCalendar.Domain.Entities.AppUser", b =>

@@ -12,8 +12,8 @@ using OfficeCalendar.Infrastructure.Persistence;
 namespace OfficeCalendar.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260105195948_Attendees")]
-    partial class Attendees
+    [Migration("20260105224103_MergeNotifs")]
+    partial class MergeNotifs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -60,13 +60,10 @@ namespace OfficeCalendar.Infrastructure.Migrations
 
             modelBuilder.Entity("OfficeCalendar.Domain.Entities.Attendee", b =>
                 {
-                    b.Property<Guid>("EventId")
+                    b.Property<Guid>("CalendarEventId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("CalendarEventId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Response")
@@ -74,9 +71,7 @@ namespace OfficeCalendar.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.HasKey("EventId", "UserId");
-
-                    b.HasIndex("CalendarEventId");
+                    b.HasKey("CalendarEventId", "UserId");
 
                     b.HasIndex("UserId");
 
@@ -124,6 +119,62 @@ namespace OfficeCalendar.Infrastructure.Migrations
                     b.ToTable("Events");
                 });
 
+            modelBuilder.Entity("OfficeCalendar.Domain.Entities.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ActorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ActorName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("EventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("RecipientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RecipientId");
+
+                    b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("OfficeCalendar.Domain.Entities.NotificationDismissal", b =>
+                {
+                    b.Property<Guid>("NotificationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DismissedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.HasKey("NotificationId", "UserId");
+
+                    b.ToTable("NotificationDismissals");
+                });
+
             modelBuilder.Entity("OfficeCalendar.Domain.Entities.Room", b =>
                 {
                     b.Property<Guid>("Id")
@@ -144,15 +195,19 @@ namespace OfficeCalendar.Infrastructure.Migrations
 
             modelBuilder.Entity("OfficeCalendar.Domain.Entities.Attendee", b =>
                 {
-                    b.HasOne("OfficeCalendar.Domain.Entities.CalendarEvent", null)
+                    b.HasOne("OfficeCalendar.Domain.Entities.CalendarEvent", "Event")
                         .WithMany("Attendees")
-                        .HasForeignKey("CalendarEventId");
+                        .HasForeignKey("CalendarEventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("OfficeCalendar.Domain.Entities.AppUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Event");
 
                     b.Navigation("User");
                 });
@@ -173,6 +228,17 @@ namespace OfficeCalendar.Infrastructure.Migrations
                     b.Navigation("Organizer");
 
                     b.Navigation("Room");
+                });
+
+            modelBuilder.Entity("OfficeCalendar.Domain.Entities.NotificationDismissal", b =>
+                {
+                    b.HasOne("OfficeCalendar.Domain.Entities.Notification", "Notification")
+                        .WithMany()
+                        .HasForeignKey("NotificationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Notification");
                 });
 
             modelBuilder.Entity("OfficeCalendar.Domain.Entities.AppUser", b =>
