@@ -7,7 +7,7 @@ export default function RegisterPage() {
       <form className="space-y-4">
         <input className="w-full rounded-md border px-3 py-2" placeholder="Email" />
         <input className="w-full rounded-md border px-3 py-2" placeholder="Password" type="password" />
-        <button className="w-full rounded-md bg-blue-600 px-4 py-2 text-black hover:bg-blue-500" type="button">
+        <button className="w-full rounded-md bg-blue-700 px-4 py-2 text-black hover:bg-blue-700" type="button">
           Create account (stub)
         </button>
       </form>

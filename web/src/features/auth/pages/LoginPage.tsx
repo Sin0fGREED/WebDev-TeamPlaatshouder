@@ -81,7 +81,7 @@ function RegisterBox({
 
           <button
             type="submit"
-            className="mt-3 bg-green-600 text-black py-2 rounded-md hover:bg-green-500 transition-colors"
+            className="mt-3 bg-blue-500 text-black py-2 rounded-md hover:bg-blue-500 transition-colors"
           >
             Register
           </button>
@@ -245,7 +245,7 @@ export default function LoginPage() {
     <div className="w-screen h-screen flex items-center justify-center relative bg-[url('/blue_background.jpg')] bg-cover bg-center">
       <div className="z-10">
         <div className="w-80 bg-white shadow-md p-6 rounded-lg">
-          <h1 className="text-2xl font-semibold text-center mb-4 text-black">Login</h1>
+          <h1 className="text-2xl font-semibold text-center mb-4 text-black">Welcome</h1>
 
           <form onSubmit={handleLogin} className="flex flex-col gap-3">
             <input
@@ -268,7 +268,7 @@ export default function LoginPage() {
 
             <button
               disabled={loading}
-              className="mt-3 bg-blue-600 text-black py-2 rounded-md hover:bg-blue-500 transition-colors disabled:opacity-50"
+              className="mt-3 bg-blue-500 text-black py-2 rounded-md hover:bg-blue-500 transition-colors disabled:opacity-50"
             >
               {loading ? "Signing in..." : "Sign in"}
             </button>
