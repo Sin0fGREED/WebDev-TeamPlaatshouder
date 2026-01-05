@@ -7,9 +7,9 @@ import { useAuth } from "../../../app/providers/AuthProvider";
 ======================= */
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-// min 8 chars, 1 uppercase, 1 number, 1 special char
-const passwordRegex =
-  /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
+// NOTE: backend currently seeds a dev-only password ("password").
+// Keep client-side validation permissive to avoid blocking valid credentials.
+const minPasswordLength = 1;
 
 /* =======================
    Register Modal
@@ -129,10 +129,8 @@ export default function LoginPage() {
       return;
     }
 
-    if (!passwordRegex.test(loginPassword)) {
-      setError(
-        "Password must be 8+ chars, include uppercase, number, and special character"
-      );
+    if (loginPassword.length < minPasswordLength) {
+      setError("Please enter your password");
       return;
     }
 
@@ -147,7 +145,11 @@ export default function LoginPage() {
         }),
       });
 
-      if (!res.ok) throw new Error("Invalid credentials");
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "Invalid credentials");
+      }
+
       const { token } = await res.json();
 
       login(token, { email: loginEmail });
@@ -175,7 +177,10 @@ export default function LoginPage() {
         }),
       });
 
-      if (!res.ok) throw new Error("Dev login failed");
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "Dev login failed");
+      }
       const { token } = await res.json();
 
       login(token, { email: "admin@test.com" });
@@ -189,7 +194,7 @@ export default function LoginPage() {
 
   /* ---------- Register ---------- */
 
-  function handleRegister(e: FormEvent) {
+  async function handleRegister(e: FormEvent) {
     e.preventDefault();
     setError(null);
 
@@ -210,8 +215,30 @@ export default function LoginPage() {
       return;
     }
 
-    alert("Registration successful");
-    setShowRegister(false);
+    setLoading(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: registerEmail,
+          password: registerPassword,
+        }),
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "Registration failed");
+      }
+
+      setShowRegister(false);
+      setLoginEmail(registerEmail);
+      setLoginPassword(registerPassword);
+    } catch (err: any) {
+      setError(err.message ?? "Registration failed");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
