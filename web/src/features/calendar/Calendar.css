@@ -24,7 +24,7 @@
   overflow: hidden; /* was visible; visible can defeat ellipsis/clamp */
 }
 
-/* Your inner container: set as a vertical stack */
+/* Inner container: set as a vertical stack */
 .fc .oc-event-inner {
   height: 100%;
   width: 100%;
@@ -105,7 +105,7 @@
   overflow: hidden; /* was visible; visible can defeat ellipsis/clamp */
 }
 
-/* Your inner container: set as a vertical stack */
+/* Inner container: set as a vertical stack */
 .fc .oc-event-inner {
   height: 100%;
   width: 100%;

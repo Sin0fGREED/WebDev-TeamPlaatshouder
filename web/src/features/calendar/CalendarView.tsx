@@ -158,7 +158,7 @@ export default function CalendarView({ layoutKey }: { layoutKey?: string }) {
           key={`fc-${zoomTier}-${slotHeightPx}-${slotDuration}-${slotMinTime}-${slotMaxTime}`}
           ref={calRef}
           locale="en-GB"
-          timeZone="UTC"
+          timeZone="local"
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           views={{
             timeGridWeek: {
