@@ -48,7 +48,7 @@ export default function DashboardPage() {
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
       <section className="card p-6">
-        <div className="mb-4 text-lg font-semibold">Monthly Calendar</div>
+        <div className="mb-4 text-lg font-semibold"></div>
         <CalendarView layoutKey={`sidebar-${collapsed ? "collapsed" : "open"}`} />
       </section>
 
@@ -112,18 +112,18 @@ export default function DashboardPage() {
         )}
       </aside>
 
-      <section className="card p-6 lg:col-span-2">
-        <div className="grid gap-6 md:grid-cols-2">
-          <div>
-            <div className="mb-3 text-lg font-semibold">Team Presence</div>
-            <p className="text-sm text-gray-500 dark:text-gray-300">Live overview of in-office / remote.</p>
-          </div>
-          <div>
-            <div className="mb-3 text-lg font-semibold">Upcoming Events</div>
-            <p className="text-sm text-gray-500 dark:text-gray-300">Your next meetings for this week.</p>
-          </div>
-        </div>
-      </section>
+      {/* <section className="card p-6 lg:col-span-2"> */}
+      {/*   <div className="grid gap-6 md:grid-cols-2"> */}
+      {/*     <div> */}
+      {/*       <div className="mb-3 text-lg font-semibold">Team Presence</div> */}
+      {/*       <p className="text-sm text-gray-500 dark:text-gray-300">Live overview of in-office / remote.</p> */}
+      {/*     </div> */}
+      {/*     <div> */}
+      {/*       <div className="mb-3 text-lg font-semibold">Upcoming Events</div> */}
+      {/*       <p className="text-sm text-gray-500 dark:text-gray-300">Your next meetings for this week.</p> */}
+      {/*     </div> */}
+      {/*   </div> */}
+      {/* </section> */}
     </div>
   );
 }
