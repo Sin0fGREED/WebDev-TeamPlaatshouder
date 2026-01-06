@@ -1,185 +1,168 @@
-:root { --fc-slot-h: 28px; }
-
-:root {
-	--oc-bg-dark: #222831;    /* very dark charcoal */
-	--oc-dark-gray: #3f4448;  /* muted dark gray */
-	--oc-teal: rgb(0, 191, 191);       /* teal band */
-	--oc-light: #f0f0f0;      /* light neutral */
-	--oc-foreground: #ffffff; /* text on dark/teal */
-}
-
-:root {
-  --radius-sm: var(--radius-sm, 6px);
-  --radius-md: var(--radius-md, 10px);
-  --shadow-sm: var(--shadow-sm, 0 6px 18px rgba(13, 52, 224, 0.932));
-  --muted: var(--muted, #6b7280);
-}
-
+/* Only the actual grid rows */
 .fc .fc-timegrid-slot,
-.fc .fc-timegrid-slot-lane,
-.fc .fc-timegrid-axis { height: var(--fc-slot-h); transition: height 180ms ease; }
-
-.fc .fc-timegrid-event { min-height: var(--fc-slot-h); box-sizing: border-box; }
-
-.fc .fc-timegrid-event .fc-event-main { padding: 2px 4px; }
-
-.fc .fc-event-main-frame { overflow: visible; }
-
-/* Make the time axis darker to match the top bands */
-.fc { background: var(--card); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); overflow: hidden; }
-.fc .fc-timegrid-axis { background: var(--palette-mid); color: var(--text); }
-
-.fc .fc-timegrid-col { background: linear-gradient(180deg, transparent, rgba(0,0,0,0.01)); }
-
-/* Header / toolbar: dark bar using the darkest color */
-.fc .fc-toolbar, .fc .fc-toolbar-chunk { background: var(--palette-dark); color: var(--palette-light); }
-.fc .fc-toolbar .fc-button, .fc .fc-toolbar button { color: var(--palette-light); border-color: rgba(255,255,255,0.06); }
-.fc .fc-toolbar .fc-toolbar-title { font-weight: 600; color: var(--palette-light); }
-
-.fc .oc-event {
-	background: transparent !important;
-	border: 0 !important;
-	padding: 0 !important;
+.fc .fc-timegrid-slot-minor,
+.fc .fc-timegrid-slot-lane {
+  height: var(--fc-slot-h) !important;
+  box-sizing: border-box;
 }
 
+/* Do NOT force these to a fixed height; it can desync labels vs slots */
+.fc .fc-timegrid-axis,
+.fc .fc-timegrid-slot-label {
+  height: auto !important;
+}
+
+/* Ensure events never expand slots; clip instead */
+.fc .fc-timegrid-event,
+.fc .fc-timegrid-event .fc-event-main,
 .fc .oc-event .fc-event-main {
-	display: block !important;
-	background: #2b7fff !important; /* medium blue */
-	color: #ffffff !important; /* white text for contrast */
-	border-radius: 12px !important;
-	box-shadow: 0 2px 6px rgba(0,0,0,0.08) !important;
-	padding: 6px 8px !important; /* restore a bit more padding now that slots are taller */
-	font-size: 12px !important;
-	line-height: 1.1 !important;
-	overflow: hidden !important;
-	z-index: 3 !important;
-	border: 1px solid rgba(0,0,0,0.06) !important;
-	position: relative !important;
-	transition: transform 180ms cubic-bezier(.2,.9,.3,1), box-shadow 180ms ease;
+  overflow: hidden !important;
 }
 
-/* inline attendee badges shown under the time/meta */
-.fc .oc-event .fc-event-main .attendees-inline { z-index: 6; }
-.fc .oc-event .fc-event-main .attendees-inline > div { box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-
-/* Dark mode: slightly different blue for events */
-html.dark .fc .oc-event .fc-event-main,
-html.dark .fc .fc-daygrid-event .fc-event-main,
-html.dark .fc .fc-daygrid-event,
-html.dark .fc .fc-daygrid-event-harness .fc-daygrid-event,
-html.dark .fc .fc-daygrid-event a,
-html.dark .fc .fc-daygrid-event .fc-event-title {
-	background: #004a6e !important;
-	color: #ffffff !important;
+/* IMPORTANT: FullCalendar sometimes uses flex layouts internally; allow clipping */
+.fc .fc-event-main-frame {
+  overflow: hidden; /* was visible; visible can defeat ellipsis/clamp */
 }
 
-/* Ensure month/day-grid events use the same blue styling */
-.fc .fc-daygrid-event .fc-event-main,
-.fc .fc-daygrid-event .fc-event-title {
-	background: #2b7fff !important;
-	color: #ffffff !important;
-	border-radius: 12px !important;
-	padding: 4px 6px !important;
-	box-shadow: 0 2px 6px rgba(0,0,0,0.06) !important;
+/* Inner container: set as a vertical stack */
+.fc .oc-event-inner {
+  height: 100%;
+  width: 100%;
+  padding: 6px 8px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
 }
 
-/* Use the primary text color (dark) for toolbar / button text in light mode so labels aren't greyed out */
-html:not(.dark) .fc .fc-button,
-html:not(.dark) .fc .fc-button:hover {
-	color: var(--text);
-	/* preserve any background/border from other rules; avoid forcing bright colors here */
+/* Title: single-line ellipsis */
+.fc .oc-event-inner .oc-title {
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.1;
+  min-width: 0; /* important for ellipsis inside flex containers */
 }
 
-/* Ensure toolbar titles and toolbar-scoped buttons use dark text in light mode */
-html:not(.dark) .fc .fc-toolbar .fc-button,
-html:not(.dark) .fc .fc-toolbar .fc-toolbar-title {
-	color: var(--text);
+/* Meta rows: single-line ellipsis */
+.fc .oc-event-inner .oc-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  opacity: 0.9;
+  min-width: 0;
 }
 
-/* Ensure the small view buttons (month/week/day) are visible */
-html:not(.dark) .fc .fc-button-primary {
-	background: var(--accent-08);
-	color: var(--accent);
-}
-html:not(.dark) .fc .fc-button-primary.fc-button-active {
-	background: var(--accent) !important;
-	color: #001717 !important;
+.fc .oc-event-inner .oc-meta .oc-meta-text {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-html:not(.dark) .fc .fc-button:hover {
-	background: #2b7fff !important; /* light blue hover */
-	color: var(--accent) !important;
+/* Attendees row: keep compact and never wrap */
+.fc .oc-event-inner .attendees-inline {
+  margin-top: 2px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  min-width: 0;
+  overflow: hidden;
 }
 
-
-.fc .oc-event .fc-event-main:hover {
-	transform: translateY(-4px) scale(1.02);
-	box-shadow: 0 10px 24px rgba(2,132,199,0.18) !important;
-}
-
-.fc .oc-event .fc-event-main::after {
-	content: "";
-	position: absolute;
-	left: 8px;
-	right: 8px;
-	bottom: 4px;
-	height: 6px;
-	background: rgba(2,132,199,0.16);
-	border-radius: 6px;
-	transform: scaleX(0);
-	transform-origin: center;
-	transition: transform 220ms cubic-bezier(.2,.9,.3,1), opacity 180ms ease;
-	opacity: 0;
-	pointer-events: none;
-}
-.fc .oc-event .fc-event-main:hover::after {
-	transform: scaleX(1);
-	opacity: 1;
+.fc .oc-event-inner .attendee-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.20);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #fff;
+  flex: 0 0 auto;
 }
 
 
-.fc .oc-event .fc-event-main .meta { opacity: 0.9; font-size: 11px; }
-
-.fc .fc-daygrid-event,
-.fc .fc-daygrid-event-harness .fc-daygrid-event,
-.fc .fc-daygrid-event a,
-.fc .fc-daygrid-event .fc-event-main,
-.fc .fc-daygrid-event .fc-event-title {
-	background: #2b7fff !important;
-	color: #ffffff !important;
-	border-radius: 12px !important;
-	position: relative !important;
+.fc .fc-timegrid-slot-label,
+.fc .fc-timegrid-axis {
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
-/* Make month events lift on hover and show the underline-shadow */
-.fc .fc-daygrid-event:hover,
-.fc .fc-daygrid-event a:hover,
-.fc .fc-daygrid-event .fc-event-main:hover {
-	transform: translateY(-4px) scale(1.02);
-	box-shadow: 0 10px 24px rgba(2,132,199,0.18) !important;
+/* Ensure events never expand slots; clip instead */
+.fc .fc-timegrid-event,
+.fc .fc-timegrid-event .fc-event-main,
+.fc .oc-event .fc-event-main {
+  overflow: hidden !important;
 }
 
-.fc .fc-daygrid-event::after,
-.fc .fc-daygrid-event .fc-event-main::after,
-.fc .fc-daygrid-event a::after {
-	content: "";
-	position: absolute;
-	left: 4px;
-	right: 4px;
-	bottom: 3px;
-	height: 6px;
-	background: rgba(2,132,199,0.14);
-	border-radius: 6px;
-	transform: scaleX(0);
-	transform-origin: center;
-	transition: transform 220ms cubic-bezier(.2,.9,.3,1), opacity 180ms ease;
-	opacity: 0;
-	pointer-events: none;
-}
-.fc .fc-daygrid-event:hover::after,
-.fc .fc-daygrid-event a:hover::after,
-.fc .fc-daygrid-event .fc-event-main:hover::after {
-	transform: scaleX(1);
-	opacity: 1;
+/* IMPORTANT: FullCalendar sometimes uses flex layouts internally; allow clipping */
+.fc .fc-event-main-frame {
+  overflow: hidden; /* was visible; visible can defeat ellipsis/clamp */
 }
 
+/* Inner container: set as a vertical stack */
+.fc .oc-event-inner {
+  height: 100%;
+  width: 100%;
+  padding: 6px 8px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+/* Title: single-line ellipsis */
+.fc .oc-event-inner .oc-title {
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.1;
+  min-width: 0; /* important for ellipsis inside flex containers */
+}
+
+/* Meta rows: single-line ellipsis */
+.fc .oc-event-inner .oc-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  opacity: 0.9;
+  min-width: 0;
+}
+
+.fc .oc-event-inner .oc-meta .oc-meta-text {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Attendees row: keep compact and never wrap */
+.fc .oc-event-inner .attendees-inline {
+  margin-top: 2px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.fc .oc-event-inner .attendee-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.20);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #fff;
+  flex: 0 0 auto;
+}

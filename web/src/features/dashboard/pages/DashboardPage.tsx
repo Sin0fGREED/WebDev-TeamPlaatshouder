@@ -1,7 +1,12 @@
 import CalendarView from "../../calendar/CalendarView";
+import { useOutletContext } from "react-router-dom";
+
 import { useEvents } from "../../events/api";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+type RootOutletCtx = { collapsed: boolean };
+
 
 function formatNextEventTime(startUtc: string) {
   const d = new Date(startUtc);
@@ -27,6 +32,8 @@ export default function DashboardPage() {
   const to = new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000).toISOString();
   const { data: events, isLoading, isError, error, refetch } = useEvents(from, to);
 
+  const { collapsed } = useOutletContext<RootOutletCtx>();
+
   useEffect(() => {
     // helps ensure dashboard is fresh after navigation
     refetch();
@@ -39,10 +46,10 @@ export default function DashboardPage() {
     .slice(0, 5);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+    <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
       <section className="card p-6">
-        <div className="mb-4 text-lg font-semibold">Monthly Calendar</div>
-        <CalendarView />
+        <div className="mb-4 text-lg font-semibold"></div>
+        <CalendarView layoutKey={`sidebar-${collapsed ? "collapsed" : "open"}`} />
       </section>
 
       <aside className="card p-0 lg:sticky lg:top-6 lg:self-start">
@@ -93,9 +100,9 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  {e.description ? (
+                  {e.roomId ? (
                     <div className="mt-3 line-clamp-2 text-xs text-gray-500 dark:text-gray-300">
-                      {e.description}
+                      {e.roomId}
                     </div>
                   ) : null}
                 </button>
@@ -105,18 +112,18 @@ export default function DashboardPage() {
         )}
       </aside>
 
-      <section className="card p-6 lg:col-span-2">
-        <div className="grid gap-6 md:grid-cols-2">
-          <div>
-            <div className="mb-3 text-lg font-semibold">Team Presence</div>
-            <p className="text-sm text-gray-500 dark:text-gray-300">Live overview of in-office / remote.</p>
-          </div>
-          <div>
-            <div className="mb-3 text-lg font-semibold">Upcoming Events</div>
-            <p className="text-sm text-gray-500 dark:text-gray-300">Your next meetings for this week.</p>
-          </div>
-        </div>
-      </section>
+      {/* <section className="card p-6 lg:col-span-2"> */}
+      {/*   <div className="grid gap-6 md:grid-cols-2"> */}
+      {/*     <div> */}
+      {/*       <div className="mb-3 text-lg font-semibold">Team Presence</div> */}
+      {/*       <p className="text-sm text-gray-500 dark:text-gray-300">Live overview of in-office / remote.</p> */}
+      {/*     </div> */}
+      {/*     <div> */}
+      {/*       <div className="mb-3 text-lg font-semibold">Upcoming Events</div> */}
+      {/*       <p className="text-sm text-gray-500 dark:text-gray-300">Your next meetings for this week.</p> */}
+      {/*     </div> */}
+      {/*   </div> */}
+      {/* </section> */}
     </div>
   );
 }

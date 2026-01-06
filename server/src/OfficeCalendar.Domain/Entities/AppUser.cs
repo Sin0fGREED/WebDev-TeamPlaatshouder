@@ -9,6 +9,6 @@ public class AppUser
     public bool IsActive { get; set; } = true;
     public string Status { get; set; } = default!;
 
-    // Nav - User can be employed at multiple companies
-    public ICollection<Employee> Employments { get; set; } = new List<Employee>();
+    // Navigation: events this user organized
+    public ICollection<CalendarEvent> OrganizedEvents { get; set; } = new List<CalendarEvent>();
 }
